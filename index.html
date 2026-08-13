@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Florida Big Bass Finder</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #0b1720;
+      color: white;
+    }
+
+    header {
+      background: linear-gradient(135deg, #063b2a, #087f5b);
+      padding: 35px 20px;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0 0 10px;
+      font-size: 36px;
+    }
+
+    header p {
+      margin: 0;
+      font-size: 17px;
+      color: #d8fff1;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: auto;
+      padding: 25px 18px 50px;
+    }
+
+    .search-box {
+      background: #142631;
+      padding: 22px;
+      border-radius: 14px;
+      margin-bottom: 25px;
+      box-shadow: 0 5px 20px rgba(0,0,0,.25);
+    }
+
+    .search-box h2 {
+      margin-top: 0;
+    }
+
+    input {
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      margin: 8px 0 12px;
+    }
+
+    button {
+      width: 100%;
+      padding: 15px;
+      border: none;
+      border-radius: 8px;
+      background: #10b981;
+      color: white;
+      font-size: 17px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #059669;
+    }
+
+    .lake-card {
+      background: #142631;
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 18px;
+      border-left: 5px solid #10b981;
+    }
+
+    .lake-card h3 {
+      margin-top: 0;
+      font-size: 24px;
+    }
+
+    .tag {
+      display: inline-block;
+      background: #075e47;
+      padding: 6px 10px;
+      border-radius: 20px;
+      margin: 4px 4px 4px 0;
+      font-size: 13px;
+    }
+
+    .score {
+      font-size: 28px;
+      font-weight: bold;
+      color: #34d399;
+    }
+
+    .info {
+      color: #cbd5e1;
+      line-height: 1.6;
+    }
+
+    footer {
+      text-align: center;
+      padding: 25px;
+      color: #94a3b8;
+      font-size: 14px;
+    }
+
+    #results {
+      display: none;
+    }
+
+    .notice {
+      background: #1e3542;
+      padding: 15px;
+      border-radius: 10px;
+      margin-top: 15px;
+      color: #dbeafe;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h1>🎣 Florida Big Bass Finder</h1>
+  <p>Find promising Florida bass waters and learn where to start fishing.</p>
+</header>
+
+<div class="container">
+
+  <div class="search-box">
+    <h2>Find Your Lake</h2>
+    <p class="info">
+      Enter a Florida lake, river, or fishing area below.
+    </p>
+
+    <input
+      type="text"
+      id="lakeSearch"
+      placeholder="Example: Lake Washington"
+    >
+
+    <button onclick="findLake()">Find Fishing Information</button>
+
+    <div class="notice">
+      Start with a lake name. More lakes, fishing conditions, maps,
+      seasonal patterns, and bass locations can be added to this app.
+    </div>
+  </div>
+
+  <div id="results"></div>
+
+  <div id="featured">
+
+    <div class="lake-card">
+      <h3>Lake Washington</h3>
+
+      <div class="score">Big Bass Potential: ★★★★☆</div>
+
+      <p class="info">
+        A shallow Florida lake with vegetation, baitfish, and areas where
+        largemouth bass can position to ambush prey.
+      </p>
+
+      <span class="tag">Largemouth Bass</span>
+      <span class="tag">Shallow Water</span>
+      <span class="tag">Vegetation</span>
+      <span class="tag">Baitfish</span>
+
+      <p class="info">
+        <strong>Starting areas:</strong><br>
+        Look for points, grass edges, pockets, current, baitfish activity,
+        and places where deeper water meets shallow feeding areas.
+      </p>
+    </div>
+
+    <div class="lake-card">
+      <h3>Lake Kissimmee</h3>
+
+      <div class="score">Big Bass Potential: ★★★★★</div>
+
+      <p class="info">
+        One of Florida's famous largemouth bass fisheries. Vegetation,
+        offshore structure, spawning areas, and baitfish can all influence
+        where larger bass position.
+      </p>
+
+      <span class="tag">Big Bass</span>
+      <span class="tag">Grass</span>
+      <span class="tag">Shiners</span>
+      <span class="tag">Structure</span>
+
+      <p class="info">
+        <strong>Starting areas:</strong><br>
+        Check vegetation edges, points, cuts, deeper water near feeding
+        areas, and locations holding baitfish.
+      </p>
+    </div>
+
+    <div class="lake-card">
+      <h3>St. Johns River</h3>
+
+      <div class="score">Big Bass Potential: ★★★★★</div>
+
+      <p class="info">
+        The St. Johns system contains a huge variety of bass habitat.
+        Current, vegetation, canals, creek mouths, bends, and baitfish
+        can create excellent ambush locations.
+      </p>
+
+      <span class="tag">River</span>
+      <span class="tag">Current</span>
+      <span class="tag">Vegetation</span>
+      <span class="tag">Structure</span>
+
+      <p class="info">
+        <strong>Starting areas:</strong><br>
+        Focus on current breaks, creek mouths, points, vegetation edges,
+        and areas where baitfish concentrate.
+      </p>
+    </div>
+
+  </div>
+
+</div>
+
+<footer>
+  Florida Big Bass Finder © 2026
+</footer>
+
+<script>
+
+const lakes = {
+
+  "lake washington": {
+    name: "Lake Washington",
+    score: "★★★★☆",
+    tags: ["Largemouth Bass", "Shallow Water", "Vegetation", "Baitfish"],
+    description:
+      "A shallow Florida lake with vegetation, baitfish, and ambush areas that can hold largemouth bass.",
+    starting:
+      "Check points, grass edges, pockets, current, baitfish activity, and places where deeper water meets shallow feeding areas."
+  },
+
+  "lake kissimmee": {
+    name: "Lake Kissimmee",
+    score: "★★★★★",
+    tags: ["Big Bass", "Grass", "Shiners", "Structure"],
+    description:
+      "A famous Florida largemouth bass fishery with extensive vegetation, structure, and baitfish.",
+    starting:
+      "Check vegetation edges, points, cuts, deeper water near feeding areas, and locations holding baitfish."
+  },
+
+  "st johns river": {
+    name: "St. Johns River",
+    score: "★★★★★",
+    tags: ["River", "Current", "Vegetation", "Structure"],
+    description:
+      "A large Florida bass system with current, vegetation, canals, creek mouths, bends, and abundant habitat.",
+    starting:
+      "Focus on current breaks, creek mouths, points, vegetation edges, and areas where baitfish concentrate."
+  }
+
+};
+
+function findLake() {
+
+  const search =
+    document.getElementById("lakeSearch")
+      .value
+      .toLowerCase()
+      .trim();
+
+  const results =
+    document.getElementById("results");
+
+  const featured =
+    document.getElementById("featured");
+
+  if (search === "") {
+
+    results.style.display = "block";
+
+    results.innerHTML = `
+      <div class="lake-card">
+        <h3>Enter a lake name</h3>
+        <p class="info">
+          Type a Florida lake or river into the search box.
+        </p>
+      </div>
+    `;
+
+    featured.style.display = "none";
+    return;
+  }
+
+  let lake = lakes[search];
+
+  if (!lake) {
+
+    for (const key in lakes) {
+
+      if (
+        key.includes(search) ||
+        lakes[key].name.toLowerCase().includes(search)
+      ) {
+        lake = lakes[key];
+        break;
+      }
+
+    }
+
+  }
+
+  featured.style.display = "none";
+  results.style.display = "block";
+
+  if (!lake) {
+
+    results.innerHTML = `
+      <div class="lake-card">
+        <h3>Lake Not Yet Added</h3>
+
+        <p class="info">
+          We don't have detailed information for
+          <strong>${escapeHtml(search)}</strong>
+          in this first version.
+        </p>
+
+        <p class="info">
+          This is where the full Florida Big Bass Finder database
+          will eventually provide fishing information.
+        </p>
+      </div>
+    `;
+
+    return;
+  }
+
+  results.innerHTML = `
+
+    <div class="lake-card">
+
+      <h3>${lake.name}</h3>
+
+      <div class="score">
+        Big Bass Potential: ${lake.score}
+      </div>
+
+      <p class="info">
+        ${lake.description}
+      </p>
+
+      ${lake.tags.map(tag =>
+        `<span class="tag">${tag}</span>`
+      ).join("")}
+
+      <p class="info">
+        <strong>Where to start:</strong><br>
+        ${lake.starting}
+      </p>
+
+    </div>
+
+  `;
+
+}
+
+function escapeHtml(text) {
+
+  const div = document.createElement("div");
+
+  div.textContent = text;
+
+  return div.innerHTML;
+
+}
+
+</script>
+
+</body>
+</html>
