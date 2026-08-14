@@ -1,4 +1,4 @@
-=== */
+kes[id];
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -31,7 +31,7 @@ body {
 margin:0;
 font-family:Arial,Helvetica,sans-serif;
 background:#07141b;
-color:white;
+color:#fff;
 }
 
 header {
@@ -81,7 +81,7 @@ padding:13px;
 border:0;
 border-radius:8px;
 font-size:16px;
-background:white;
+background:#fff;
 color:#111;
 }
 
@@ -143,6 +143,10 @@ font-size:16px;
 margin-top:12px;
 }
 
+button:active {
+transform:scale(.99);
+}
+
 .leaflet-control-layers {
 font-size:13px;
 }
@@ -165,6 +169,7 @@ height:420px;
 
 <body>
 
+
 <header>
 
 <h1>🎣 Florida Big Bass Finder</h1>
@@ -185,39 +190,39 @@ Choose Lake or Chain
 
 <select id="lake">
 
-<option value="washington">
+<option value="Lake Washington">
 Lake Washington
 </option>
 
-<option value="poinsett">
+<option value="Lake Poinsett">
 Lake Poinsett
 </option>
 
-<option value="harris">
+<option value="Harris Chain">
 Harris Chain
 </option>
 
-<option value="alligator">
+<option value="Alligator Chain">
 Alligator Chain
 </option>
 
-<option value="stjohns">
+<option value="St. Johns River">
 St. Johns River
 </option>
 
-<option value="kissimmee">
+<option value="Lake Kissimmee">
 Lake Kissimmee
 </option>
 
-<option value="bluecypress">
+<option value="Blue Cypress Lake">
 Blue Cypress Lake
 </option>
 
-<option value="george">
+<option value="Lake George">
 Lake George
 </option>
 
-<option value="apopka">
+<option value="Lake Apopka">
 Lake Apopka
 </option>
 
@@ -232,7 +237,9 @@ Lake Apopka
 Lake Washington
 </h2>
 
+
 <div class="conditions">
+
 
 <div class="condition">
 
@@ -285,6 +292,7 @@ Loading...
 
 </div>
 
+
 </div>
 
 
@@ -298,15 +306,18 @@ Refresh Current Conditions
 <div class="card">
 
 <h2>
-🗺️ Fishing Map
+🗺️ Lake & Bottom Map
 </h2>
 
-<div id="map"></div>
+
+<div id="map">
+</div>
+
 
 <div id="mapStatus"
 class="status">
 
-Loading map...
+Finding the actual lake boundary...
 
 </div>
 
@@ -321,18 +332,19 @@ Loading map...
 
 <p class="note">
 
-The map now uses verified lake locations. The
-next stage is adding actual lake boundaries,
-depth contours, structure, vegetation and
-bass-holding analysis.
+The map uses actual FWC lake geometry and
+bathymetry data when available.
 
 </p>
 
 <p class="note">
 
-We are deliberately not putting fake bass
-locations on the map. A colored dot sitting
-in a cow pasture isn't a fishing pattern.
+We are not displaying invented fishing spots.
+Once the lake geometry and depth data are
+working correctly, the bass-analysis system
+can use depth, structure, vegetation and
+other information to identify high-potential
+areas.
 
 </p>
 
@@ -345,136 +357,30 @@ in a cow pasture isn't a fishing pattern.
 <script>
 
 
-/* =========================================
-   VERIFIED LAKE LOCATIONS
-========================================= */
+/* =====================================================
+   FWC LAKE BATHYMETRY FEATURE SERVICE
+===================================================== */
 
-const lakes = {
 
+const FWC_LAKE_SERVICE =
 
-washington: {
+"https://ocean.floridamarine.org/arcgis/rest/services/Projects_FWC/WHOML_bathymetryService/MapServer/3";
 
-name:"Lake Washington",
 
-lat:28.1440405,
+/* =====================================================
+   FWC BATHYMETRY CONTOURS
+===================================================== */
 
-lng:-80.7455146,
 
-zoom:14
+const FWC_CONTOUR_SERVICE =
 
-},
+"https://ocean.floridamarine.org/arcgis/rest/services/Projects_FWC/WhatsHappeningOnMyLake/MapServer/30";
 
 
-poinsett: {
+/* =====================================================
+   MAP
+===================================================== */
 
-name:"Lake Poinsett",
-
-lat:28.3380228,
-
-lng:-80.8331575,
-
-zoom:13
-
-},
-
-
-harris: {
-
-name:"Harris Chain",
-
-lat:28.7800,
-
-lng:-81.8000,
-
-zoom:12
-
-},
-
-
-alligator: {
-
-name:"Alligator Chain",
-
-lat:28.1600,
-
-lng:-81.6000,
-
-zoom:12
-
-},
-
-
-stjohns: {
-
-name:"St. Johns River",
-
-lat:28.7000,
-
-lng:-81.5000,
-
-zoom:10
-
-},
-
-
-kissimmee: {
-
-name:"Lake Kissimmee",
-
-lat:27.91069479,
-
-lng:-81.26696157,
-
-zoom:13
-
-},
-
-
-bluecypress: {
-
-name:"Blue Cypress Lake",
-
-lat:27.72669646,
-
-lng:-80.77478105,
-
-zoom:13
-
-},
-
-
-george: {
-
-name:"Lake George",
-
-lat:29.28570622,
-
-lng:-81.59595839,
-
-zoom:12
-
-},
-
-
-apopka: {
-
-name:"Lake Apopka",
-
-lat:28.62397977,
-
-lng:-81.62614789,
-
-zoom:12
-
-}
-
-
-};
-
-
-/* =========================================
-   CREATE MAP
-========================================= */
 
 const map = L.map("map", {
 
@@ -483,27 +389,14 @@ zoomControl:true
 });
 
 
-/* =========================================
-   MAP LAYERS
-========================================= */
-
-const streetMap = L.tileLayer(
-
-"https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-
-{
-
-maxZoom:19,
-
-attribution:
-"&copy; OpenStreetMap contributors"
-
-}
-
-);
+/* =====================================================
+   BASE MAPS
+===================================================== */
 
 
-const satelliteMap = L.tileLayer(
+const satelliteMap =
+
+L.tileLayer(
 
 "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
 
@@ -511,28 +404,48 @@ const satelliteMap = L.tileLayer(
 
 maxZoom:19,
 
-attribution:
-"Tiles &copy; Esri"
+attribution:"Tiles &copy; Esri"
 
 }
 
 );
 
 
-/* =========================================
-   FWC BATHYMETRY
-========================================= */
+const streetMap =
+
+L.tileLayer(
+
+"https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+
+{
+
+maxZoom:19,
+
+attribution:"&copy; OpenStreetMap contributors"
+
+}
+
+);
+
+
+/* =====================================================
+   FWC DYNAMIC BATHYMETRY
+===================================================== */
+
 
 const fwcBathymetry =
 
 L.esri.dynamicMapLayer({
 
 url:
-"https://gis.myfwc.com/hosting/rest/services/Open_Data/Bathymetry_of_Select_Lakes_in_Florida/MapServer",
+FWC_LAKE_SERVICE.replace(
+"/3",
+""
+),
 
 layers:[3],
 
-opacity:.80,
+opacity:.75,
 
 attribution:
 "Florida Fish and Wildlife Conservation Commission"
@@ -540,31 +453,61 @@ attribution:
 });
 
 
-/* =========================================
-   MAP LAYERS CONTROL
-========================================= */
+/* =====================================================
+   FWC CONTOURS
+===================================================== */
 
-const baseMaps = {
+
+const fwcContours =
+
+L.esri.dynamicMapLayer({
+
+url:
+FWC_CONTOUR_SERVICE.replace(
+"/30",
+""
+),
+
+layers:[30],
+
+opacity:.95,
+
+attribution:
+"Florida Fish and Wildlife Conservation Commission"
+
+});
+
+
+/* =====================================================
+   START MAP
+===================================================== */
+
+
+satelliteMap.addTo(map);
+
+
+/* =====================================================
+   LAYER CONTROL
+===================================================== */
+
+
+L.control.layers(
+
+{
 
 "Satellite":satelliteMap,
 
 "Street Map":streetMap
 
-};
+},
 
+{
 
-const overlays = {
+"FWC Bathymetry":fwcBathymetry,
 
-"FWC Bathymetry":fwcBathymetry
+"FWC Depth Contours":fwcContours
 
-};
-
-
-L.control.layers(
-
-baseMaps,
-
-overlays,
+},
 
 {
 
@@ -575,59 +518,375 @@ collapsed:false
 ).addTo(map);
 
 
-/* =========================================
-   CENTER MAP ON LAKE
-========================================= */
-
-function centerOnLake(id) {
-
-const lake =
-lakes[id];
+/* =====================================================
+   CURRENT LAKE LAYER
+===================================================== */
 
 
-map.setView(
+let currentLakeLayer = null;
 
-[
-lake.lat,
-lake.lng
-],
 
-lake.zoom,
+/* =====================================================
+   FIND ACTUAL LAKE FROM FWC
+===================================================== */
+
+
+async function findLake(lakeName) {
+
+
+const status =
+
+document.getElementById(
+"mapStatus"
+);
+
+
+status.textContent =
+
+"Finding " +
+lakeName +
+" in the FWC lake database...";
+
+
+if(currentLakeLayer) {
+
+map.removeLayer(
+currentLakeLayer
+);
+
+currentLakeLayer = null;
+
+}
+
+
+/*
+   IMPORTANT:
+   Query the actual FWC polygon.
+   We are NOT guessing coordinates.
+*/
+
+
+const where =
+
+"Waterbody = '" +
+
+lakeName.replace(
+"'",
+"''"
+) +
+
+"'";
+
+
+const url =
+
+FWC_LAKE_SERVICE +
+
+"/query" +
+
+"?where=" +
+encodeURIComponent(where) +
+
+"&outFields=Waterbody,Depth_Feet,Depth_Meters" +
+
+"&returnGeometry=true" +
+
+"&outSR=4326" +
+
+"&f=geojson";
+
+
+try {
+
+
+const response =
+
+await fetch(url);
+
+
+if(!response.ok) {
+
+throw new Error(
+"FWC request failed"
+);
+
+}
+
+
+const geojson =
+
+await response.json();
+
+
+if(
+!geojson.features ||
+geojson.features.length === 0
+) {
+
+
+status.textContent =
+
+"FWC does not currently have a bathymetry polygon for " +
+lakeName +
+". The map will still show the location using a fallback search.";
+
+
+return false;
+
+}
+
+
+/* =====================================================
+   DRAW ACTUAL FWC POLYGON
+===================================================== */
+
+
+currentLakeLayer =
+
+L.geoJSON(
+
+geojson,
 
 {
 
-animate:true
+style: {
+
+color:"#00ffff",
+
+weight:2,
+
+fillColor:"#0077aa",
+
+fillOpacity:.18
+
+},
+
+onEachFeature:
+function(
+feature,
+layer
+) {
+
+
+const props =
+feature.properties;
+
+
+let popup =
+
+"<strong>" +
+(props.Waterbody || lakeName) +
+"</strong>";
+
+
+if(
+props.Depth_Feet !== null &&
+props.Depth_Feet !== undefined
+) {
+
+popup +=
+
+"<br>Depth: " +
+props.Depth_Feet +
+" ft";
+
+}
+
+
+layer.bindPopup(
+popup
+);
+
+}
+
+}
+
+).addTo(map);
+
+
+/* =====================================================
+   FIT MAP TO ACTUAL LAKE
+===================================================== */
+
+
+const bounds =
+
+currentLakeLayer.getBounds();
+
+
+if(bounds.isValid()) {
+
+
+map.fitBounds(
+
+bounds,
+
+{
+
+padding:[30,30],
+
+maxZoom:15
 
 }
 
 );
 
 
-document.getElementById(
-"lakeName"
-).textContent =
-lake.name;
+}
 
 
-document.getElementById(
-"mapStatus"
-).textContent =
-
-"Centered on " +
-lake.name +
-". Satellite imagery is active. Open the layers control to turn FWC bathymetry on or off.";
+/* =====================================================
+   STATUS
+===================================================== */
 
 
-loadWeather();
+status.textContent =
+
+"Actual FWC lake boundary loaded for " +
+lakeName +
+". Turn on FWC Bathymetry or FWC Depth Contours using the layers control.";
+
+
+return true;
+
 
 }
 
 
-/* =========================================
-   WEATHER FUNCTIONS
-========================================= */
+catch(error) {
 
-function degreesToCompass(degrees) {
+
+console.error(error);
+
+
+status.textContent =
+
+"Unable to load the FWC lake boundary right now. The map itself is still available.";
+
+
+return false;
+
+}
+
+}
+
+
+/* =====================================================
+   FALLBACK LOCATION DATABASE
+   ONLY USED IF FWC DOES NOT HAVE THE LAKE
+===================================================== */
+
+
+const fallbackLocations = {
+
+
+"Lake Washington":[
+
+28.1440,
+-80.7455
+],
+
+
+"Lake Poinsett":[
+
+28.3380,
+-80.8331
+],
+
+
+"Harris Chain":[
+
+28.7800,
+-81.8000
+],
+
+
+"Alligator Chain":[
+
+28.1600,
+-81.6000
+],
+
+
+"St. Johns River":[
+
+28.7000,
+-81.5000
+],
+
+
+"Lake Kissimmee":[
+
+27.9107,
+-81.2670
+],
+
+
+"Blue Cypress Lake":[
+
+27.7267,
+-80.7748
+],
+
+
+"Lake George":[
+
+29.2857,
+-81.5960
+],
+
+
+"Lake Apopka":[
+
+28.6240,
+-81.6261
+]
+
+};
+
+
+/* =====================================================
+   FALLBACK MAP LOCATION
+===================================================== */
+
+
+function fallbackMapLocation(
+lakeName
+) {
+
+
+const coords =
+
+fallbackLocations[
+lakeName
+];
+
+
+if(!coords) {
+
+return;
+
+}
+
+
+map.setView(
+coords,
+13
+);
+
+
+}
+
+
+/* =====================================================
+   WEATHER
+===================================================== */
+
+
+function degreesToCompass(
+degrees
+) {
+
 
 const directions = [
 
@@ -642,16 +901,24 @@ const directions = [
 
 ];
 
+
 return directions[
-Math.round(degrees / 45) % 8
+
+Math.round(
+degrees / 45
+) % 8
+
 ];
 
 }
 
 
-function pressureToInHg(hpa) {
+function pressureToInHg(
+hpa
+) {
 
-return hpa * 0.0295299833;
+return hpa *
+0.0295299833;
 
 }
 
@@ -663,6 +930,7 @@ windSpeed,
 temperature
 
 ) {
+
 
 let score = 0;
 
@@ -723,19 +991,50 @@ return "FAIR";
 }
 
 
-/* =========================================
-   CURRENT WEATHER
-========================================= */
+/* =====================================================
+   WEATHER LOCATION
+===================================================== */
+
+
+function getWeatherCoordinates(
+lakeName
+) {
+
+
+return fallbackLocations[
+lakeName
+];
+
+}
+
+
+/* =====================================================
+   LOAD WEATHER
+===================================================== */
+
 
 async function loadWeather() {
 
 
-const id =
-document.getElementById("lake").value;
+const lakeName =
+
+document.getElementById(
+"lake"
+).value;
 
 
-const lake =
-lakes[id];
+const coords =
+
+getWeatherCoordinates(
+lakeName
+);
+
+
+if(!coords) {
+
+return;
+
+}
 
 
 document.getElementById(
@@ -767,10 +1066,10 @@ const url =
 "https://api.open-meteo.com/v1/forecast" +
 
 "?latitude=" +
-lake.lat +
+coords[0] +
 
 "&longitude=" +
-lake.lng +
+coords[1] +
 
 "&current=" +
 
@@ -924,70 +1223,9 @@ document.getElementById(
 }
 
 
-/* =========================================
-   LAKE SELECTOR
-========================================= */
-
-document
-.getElementById("lake")
-.addEventListener(
-
-"change",
-
-function() {
-
-centerOnLake(
-this.value
-);
-
-}
-
-);
-
-
-/* =========================================
-   REFRESH WEATHER
-========================================= */
-
-document
-.getElementById("refreshWeather")
-.addEventListener(
-
-"click",
-
-loadWeather
-
-);
-
-
-/* =========================================
-   STARTUP
-========================================= */
-
-satelliteMap.addTo(map);
-
-
-centerOnLake(
-"washington"
-);
-
-
-</script>
-
-</body>
-
-</html>
-
-function changeLake() {
-
-
-const id =
-document.getElementById("lake").value;
-
-
-const lake =
-lakes[id];
-
+/* =====================================================
+   SELECT LAKE
+================================================
 
 document.getElementById(
 "lakeName"
