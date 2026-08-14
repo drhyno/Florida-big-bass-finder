@@ -7,136 +7,192 @@
 <title>Florida Big Bass Finder</title>
 
 <link
-rel="stylesheet"
-href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
 />
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script src="https://unpkg.com/esri-leaflet@3.0.19/dist/esri-leaflet.js"></script>
 
 <style>
 
 * {
-box-sizing:border-box;
+  box-sizing: border-box;
 }
 
 body {
-margin:0;
-font-family:Arial,sans-serif;
-background:#0b1720;
-color:white;
+  margin: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  background: #07141b;
+  color: #ffffff;
 }
 
 header {
-background:#102c3a;
-padding:18px;
-text-align:center;
-border-bottom:2px solid #1f6175;
+  background: #0c2937;
+  padding: 18px 15px;
+  text-align: center;
+  border-bottom: 2px solid #23677b;
 }
 
 header h1 {
-margin:0;
-font-size:25px;
+  margin: 0;
+  font-size: 26px;
 }
 
 header p {
-margin:7px 0 0;
-color:#b8d6df;
+  margin: 7px 0 0;
+  color: #b9d4dc;
 }
 
 .container {
-max-width:950px;
-margin:auto;
-padding:15px;
+  max-width: 1000px;
+  margin: auto;
+  padding: 14px;
 }
 
 .card {
-background:#142832;
-border-radius:12px;
-padding:16px;
-margin-bottom:15px;
-box-shadow:0 3px 10px rgba(0,0,0,.35);
+  background: #102630;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 14px;
+  box-shadow: 0 3px 12px rgba(0,0,0,.35);
+}
+
+.card h2 {
+  margin-top: 0;
 }
 
 label {
-display:block;
-font-weight:bold;
-margin-bottom:7px;
+  display: block;
+  font-weight: bold;
+  margin-bottom: 7px;
 }
 
 select {
-width:100%;
-padding:13px;
-border-radius:8px;
-border:none;
-font-size:16px;
+  width: 100%;
+  padding: 13px;
+  border: 0;
+  border-radius: 8px;
+  font-size: 16px;
+  background: white;
+  color: #111;
 }
 
 .conditions {
-display:grid;
-grid-template-columns:repeat(2,1fr);
-gap:10px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
 }
 
 .condition {
-background:#0d202a;
-padding:14px;
-border-radius:8px;
+  background: #081a23;
+  border-radius: 9px;
+  padding: 13px;
 }
 
 .condition span {
-display:block;
-font-size:13px;
-color:#9fc2cc;
-margin-bottom:5px;
+  display: block;
+  font-size: 13px;
+  color: #9dbcc6;
+  margin-bottom: 5px;
 }
 
 .condition strong {
-font-size:17px;
+  font-size: 18px;
 }
 
 #map {
-height:450px;
-width:100%;
-border-radius:10px;
+  width: 100%;
+  height: 500px;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.status {
+  margin-top: 10px;
+  padding: 10px;
+  border-radius: 7px;
+  background: #0a1c25;
+  color: #b9d4dc;
+  font-size: 13px;
 }
 
 .legend {
-display:flex;
-gap:18px;
-flex-wrap:wrap;
-margin-top:12px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-top: 12px;
 }
 
-.legend-item {
-display:flex;
-align-items:center;
-gap:7px;
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 14px;
 }
 
 .dot {
-width:16px;
-height:16px;
-border-radius:50%;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
 }
 
-.blue {
-background:#168cff;
+.trophy {
+  background: #168cff;
 }
 
-.green {
-background:#31c96b;
+.high {
+  background: #24c96b;
 }
 
-.yellow {
-background:#e5d62e;
+.possible {
+  background: #e4d326;
 }
 
 .note {
-font-size:13px;
-line-height:1.5;
-color:#a9c3cc;
+  color: #aac4cc;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+#refreshWeather {
+  width: 100%;
+  padding: 13px;
+  border: 0;
+  border-radius: 8px;
+  background: #197fa7;
+  color: white;
+  font-weight: bold;
+  font-size: 16px;
+  margin-top: 12px;
+}
+
+#refreshWeather:active {
+  transform: scale(.99);
+}
+
+.leaflet-control-layers {
+  font-size: 13px;
+}
+
+@media (max-width: 600px) {
+
+  header h1 {
+    font-size: 22px;
+  }
+
+  #map {
+    height: 420px;
+  }
+
+  .conditions {
+    grid-template-columns: 1fr 1fr;
+  }
+
 }
 
 </style>
-
 </head>
 
 <body>
@@ -145,7 +201,7 @@ color:#a9c3cc;
 
 <h1>🎣 Florida Big Bass Finder</h1>
 
-<p>Find the areas most likely to hold big bass</p>
+<p>Find the water most likely to hold big bass</p>
 
 </header>
 
@@ -155,43 +211,17 @@ color:#a9c3cc;
 
 <label for="lake">Choose Lake or Chain</label>
 
-<select id="lake" onchange="changeLake()">
+<select id="lake">
 
-<option value="washington">
-Lake Washington
-</option>
-
-<option value="poinsett">
-Lake Poinsett
-</option>
-
-<option value="harris">
-Harris Chain
-</option>
-
-<option value="alligator">
-Alligator Chain
-</option>
-
-<option value="stjohns">
-St. Johns River
-</option>
-
-<option value="kissimmee">
-Lake Kissimmee
-</option>
-
-<option value="bluecypress">
-Blue Cypress Lake
-</option>
-
-<option value="george">
-Lake George
-</option>
-
-<option value="apopka">
-Lake Apopka
-</option>
+<option value="washington">Lake Washington</option>
+<option value="poinsett">Lake Poinsett</option>
+<option value="harris">Harris Chain</option>
+<option value="alligator">Alligator Chain</option>
+<option value="stjohns">St. Johns River</option>
+<option value="kissimmee">Lake Kissimmee</option>
+<option value="bluecypress">Blue Cypress Lake</option>
+<option value="george">Lake George</option>
+<option value="apopka">Lake Apopka</option>
 
 </select>
 
@@ -206,11 +236,9 @@ Lake Apopka
 
 <div class="condition">
 
-<span>Water Temperature</span>
+<span>Air Temperature</span>
 
-<strong id="waterTemp">
-82°F
-</strong>
+<strong id="airTemp">Loading...</strong>
 
 </div>
 
@@ -219,9 +247,7 @@ Lake Apopka
 
 <span>Wind</span>
 
-<strong id="wind">
-SE 8 MPH
-</strong>
+<strong id="wind">Loading...</strong>
 
 </div>
 
@@ -230,9 +256,7 @@ SE 8 MPH
 
 <span>Barometric Pressure</span>
 
-<strong id="pressure">
-30.05 inHg
-</strong>
+<strong id="pressure">Loading...</strong>
 
 </div>
 
@@ -241,49 +265,44 @@ SE 8 MPH
 
 <span>Fishing Rating</span>
 
-<strong id="rating">
-GOOD
-</strong>
+<strong id="rating">Loading...</strong>
 
 </div>
 
 </div>
+
+<button id="refreshWeather">
+Refresh Current Conditions
+</button>
 
 </div>
 
 
 <div class="card">
 
-<h2>Map</h2>
+<h2>🗺️ Fishing Map</h2>
 
 <div id="map"></div>
 
+<div id="mapStatus" class="status">
+Loading map layers...
+</div>
+
 <div class="legend">
 
-<div class="legend-item">
-
-<div class="dot blue"></div>
-
-<span>Trophy Bass</span>
-
+<div class="legendItem">
+<div class="dot trophy"></div>
+<span>Trophy Bass Potential</span>
 </div>
 
-
-<div class="legend-item">
-
-<div class="dot green"></div>
-
+<div class="legendItem">
+<div class="dot high"></div>
 <span>High Potential</span>
-
 </div>
 
-
-<div class="legend-item">
-
-<div class="dot yellow"></div>
-
+<div class="legendItem">
+<div class="dot possible"></div>
 <span>Possible Bass</span>
-
 </div>
 
 </div>
@@ -293,395 +312,649 @@ GOOD
 
 <div class="card">
 
-<h2>🎯 Bass Potential</h2>
+<h2>🎯 Bass Finder</h2>
 
 <p class="note">
 
-The colored areas are the beginning of our fishing-analysis
-layer. Blue represents the strongest trophy-bass potential,
-green represents high potential, and yellow represents possible
-bass-holding water.
+Blue areas are the strongest trophy-bass targets.
+Green areas are high-potential areas.
+Yellow areas are lower-confidence areas.
 
 </p>
 
 <p class="note">
 
-The next development step is replacing these demonstration
-locations with actual GIS, depth, structure, vegetation and
-historical bass data.
+The fishing zones shown in this first test version are
+demonstration analysis areas. The next development stage is
+where we feed actual depth, vegetation, structure, baitfish,
+weather history and other lake information into the bass
+prediction system.
+
+</p>
+
+<p class="note">
+
+FWC bathymetry is environmental mapping data and is not
+navigation or survey data.
 
 </p>
 
 </div>
 
 </div>
-
-
-<script
-src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
-</script>
 
 
 <script>
 
+/* =========================
+   LAKE DATABASE
+========================= */
+
 const lakes = {
 
 washington: {
-
-name:"Lake Washington",
-
-lat:28.055,
-
-lng:-80.830,
-
-zoom:13,
-
-temp:"82°F",
-
-wind:"SE 8 MPH",
-
-pressure:"30.05 inHg",
-
-rating:"GOOD"
-
+  name: "Lake Washington",
+  lat: 28.055,
+  lng: -80.830,
+  zoom: 13
 },
 
 poinsett: {
-
-name:"Lake Poinsett",
-
-lat:28.165,
-
-lng:-80.910,
-
-zoom:13,
-
-temp:"83°F",
-
-wind:"SE 7 MPH",
-
-pressure:"30.04 inHg",
-
-rating:"GOOD"
-
+  name: "Lake Poinsett",
+  lat: 28.165,
+  lng: -80.910,
+  zoom: 13
 },
 
 harris: {
-
-name:"Harris Chain",
-
-lat:28.780,
-
-lng:-81.850,
-
-zoom:11,
-
-temp:"81°F",
-
-wind:"S 9 MPH",
-
-pressure:"30.02 inHg",
-
-rating:"VERY GOOD"
-
+  name: "Harris Chain",
+  lat: 28.780,
+  lng: -81.850,
+  zoom: 11
 },
 
 alligator: {
-
-name:"Alligator Chain",
-
-lat:28.160,
-
-lng:-81.600,
-
-zoom:12,
-
-temp:"82°F",
-
-wind:"SE 8 MPH",
-
-pressure:"30.03 inHg",
-
-rating:"GOOD"
-
+  name: "Alligator Chain",
+  lat: 28.160,
+  lng: -81.600,
+  zoom: 12
 },
 
 stjohns: {
-
-name:"St. Johns River",
-
-lat:28.900,
-
-lng:-81.550,
-
-zoom:10,
-
-temp:"81°F",
-
-wind:"S 10 MPH",
-
-pressure:"30.01 inHg",
-
-rating:"VERY GOOD"
-
+  name: "St. Johns River",
+  lat: 28.900,
+  lng: -81.550,
+  zoom: 10
 },
 
 kissimmee: {
-
-name:"Lake Kissimmee",
-
-lat:27.950,
-
-lng:-81.370,
-
-zoom:12,
-
-temp:"83°F",
-
-wind:"SE 9 MPH",
-
-pressure:"30.04 inHg",
-
-rating:"VERY GOOD"
-
+  name: "Lake Kissimmee",
+  lat: 27.950,
+  lng: -81.370,
+  zoom: 12
 },
 
 bluecypress: {
-
-name:"Blue Cypress Lake",
-
-lat:27.800,
-
-lng:-80.900,
-
-zoom:12,
-
-temp:"82°F",
-
-wind:"E 8 MPH",
-
-pressure:"30.05 inHg",
-
-rating:"GOOD"
-
+  name: "Blue Cypress Lake",
+  lat: 27.800,
+  lng: -80.900,
+  zoom: 12
 },
 
 george: {
-
-name:"Lake George",
-
-lat:29.520,
-
-lng:-81.650,
-
-zoom:11,
-
-temp:"80°F",
-
-wind:"S 11 MPH",
-
-pressure:"30.00 inHg",
-
-rating:"GOOD"
-
+  name: "Lake George",
+  lat: 29.520,
+  lng: -81.650,
+  zoom: 11
 },
 
 apopka: {
-
-name:"Lake Apopka",
-
-lat:28.620,
-
-lng:-81.600,
-
-zoom:12,
-
-temp:"82°F",
-
-wind:"SW 7 MPH",
-
-pressure:"30.06 inHg",
-
-rating:"GOOD"
-
+  name: "Lake Apopka",
+  lat: 28.620,
+  lng: -81.600,
+  zoom: 12
 }
 
 };
 
 
-const map =
-L.map("map").setView(
-[lakes.washington.lat,lakes.washington.lng],
-lakes.washington.zoom
+/* =========================
+   MAP
+========================= */
+
+const map = L.map("map", {
+  zoomControl: true
+}).setView(
+  [lakes.washington.lat, lakes.washington.lng],
+  lakes.washington.zoom
 );
 
 
-L.tileLayer(
-"https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-{
+/* STREET MAP */
 
-maxZoom:19,
+const streetMap = L.tileLayer(
+  "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+  {
+    maxZoom: 19,
+    attribution:
+      '&copy; OpenStreetMap contributors'
+  }
+);
 
-attribution:
-"&copy; OpenStreetMap contributors"
+
+/* SATELLITE MAP */
+
+const satelliteMap = L.tileLayer(
+  "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+  {
+    maxZoom: 19,
+    attribution:
+      "Tiles &copy; Esri"
+  }
+);
+
+
+/* START WITH SATELLITE */
+
+satelliteMap.addTo(map);
+
+
+/* =========================
+   FWC BATHYMETRY
+========================= */
+
+const fwcBathymetry =
+  L.esri.dynamicMapLayer({
+
+    url:
+      "https://gis.myfwc.com/hosting/rest/services/Open_Data/Bathymetry_of_Select_Lakes_in_Florida/MapServer",
+
+    layers: [3],
+
+    opacity: 0.75,
+
+    attribution:
+      "Florida Fish and Wildlife Conservation Commission - FWRI"
+
+  });
+
+
+/* =========================
+   SECOND FWC SONAR BATHYMETRY
+========================= */
+
+const fwcSonar =
+  L.esri.dynamicMapLayer({
+
+    url:
+      "https://ocean.floridamarine.org/arcgis/rest/services/Projects_FWC/WhatsHappeningOnMyLake/MapServer",
+
+    layers: [31],
+
+    opacity: 0.55,
+
+    attribution:
+      "Florida Fish and Wildlife Conservation Commission - FWRI"
+
+  });
+
+
+/* =========================
+   FISHING ZONES
+========================= */
+
+let fishingZones = L.layerGroup().addTo(map);
+
+
+function makeFishingZones(lake) {
+
+  fishingZones.clearLayers();
+
+
+  const zones = [
+
+    {
+      lat: lake.lat + 0.012,
+      lng: lake.lng - 0.018,
+      color: "#168cff",
+      label: "Trophy Bass Potential"
+    },
+
+    {
+      lat: lake.lat - 0.010,
+      lng: lake.lng + 0.020,
+      color: "#24c96b",
+      label: "High Bass Potential"
+    },
+
+    {
+      lat: lake.lat + 0.019,
+      lng: lake.lng + 0.027,
+      color: "#e4d326",
+      label: "Possible Bass"
+    },
+
+    {
+      lat: lake.lat - 0.022,
+      lng: lake.lng - 0.008,
+      color: "#24c96b",
+      label: "High Bass Potential"
+    }
+
+  ];
+
+
+  zones.forEach(zone => {
+
+    L.circle(
+      [zone.lat, zone.lng],
+      {
+        radius: 450,
+        color: zone.color,
+        fillColor: zone.color,
+        fillOpacity: 0.38,
+        weight: 2
+      }
+    )
+    .bindPopup(
+      "<strong>" +
+      zone.label +
+      "</strong><br>" +
+      lake.name +
+      "<br><br>" +
+      "Demonstration fishing-analysis zone"
+    )
+    .addTo(fishingZones);
+
+  });
 
 }
+
+
+/* =========================
+   MAP LAYER CONTROL
+========================= */
+
+const baseMaps = {
+
+  "Satellite": satelliteMap,
+
+  "Street Map": streetMap
+
+};
+
+
+const overlays = {
+
+  "FWC Bathymetry Contours": fwcBathymetry,
+
+  "FWC Sonar Bathymetry": fwcSonar,
+
+  "Bass Potential Zones": fishingZones
+
+};
+
+
+L.control.layers(
+  baseMaps,
+  overlays,
+  {
+    collapsed: false
+  }
 ).addTo(map);
 
 
-let markers = [];
+/* =========================
+   WEATHER
+========================= */
 
+function degreesToCompass(degrees) {
 
-function addFishingSpots(lake) {
+  const directions = [
+    "N",
+    "NE",
+    "E",
+    "SE",
+    "S",
+    "SW",
+    "W",
+    "NW"
+  ];
 
-markers.forEach(marker =>
-map.removeLayer(marker)
-);
+  const index =
+    Math.round(degrees / 45) % 8;
 
-markers=[];
-
-
-const spots = [
-
-{
-
-lat:lake.lat+0.015,
-
-lng:lake.lng-0.020,
-
-color:"#168cff",
-
-title:"Trophy Bass Potential"
-
-},
-
-{
-
-lat:lake.lat-0.012,
-
-lng:lake.lng+0.018,
-
-color:"#31c96b",
-
-title:"High Bass Potential"
-
-},
-
-{
-
-lat:lake.lat+0.020,
-
-lng:lake.lng+0.030,
-
-color:"#e5d62e",
-
-title:"Possible Bass"
-
-},
-
-{
-
-lat:lake.lat-0.025,
-
-lng:lake.lng-0.010,
-
-color:"#31c96b",
-
-title:"High Bass Potential"
+  return directions[index];
 
 }
 
-];
 
+function pressureToInHg(hpa) {
 
-spots.forEach(spot => {
-
-const marker =
-L.circle(
-[spot.lat,spot.lng],
-{
-
-radius:450,
-
-color:spot.color,
-
-fillColor:spot.color,
-
-fillOpacity:.45
-
-}
-).addTo(map);
-
-
-marker.bindPopup(
-"<b>"+spot.title+"</b><br>"+
-lake.name
-);
-
-
-markers.push(marker);
-
-});
+  return hpa * 0.0295299833;
 
 }
 
+
+function calculateRating(
+  pressure,
+  windSpeed,
+  temperature
+) {
+
+  let score = 0;
+
+
+  /* Pressure */
+
+  if (
+    pressure >= 29.80 &&
+    pressure <= 30.20
+  ) {
+
+    score += 2;
+
+  }
+
+
+  /* Wind */
+
+  if (
+    windSpeed >= 5 &&
+    windSpeed <= 15
+  ) {
+
+    score += 2;
+
+  }
+
+
+  /* Warm Florida water/air */
+
+  if (
+    temperature >= 75 &&
+    temperature <= 90
+  ) {
+
+    score += 1;
+
+  }
+
+
+  if (score >= 5) {
+
+    return "EXCELLENT";
+
+  }
+
+  if (score >= 4) {
+
+    return "VERY GOOD";
+
+  }
+
+  if (score >= 3) {
+
+    return "GOOD";
+
+  }
+
+  return "FAIR";
+
+}
+
+
+async function loadWeather() {
+
+  const id =
+    document.getElementById("lake").value;
+
+  const lake =
+    lakes[id];
+
+
+  document.getElementById(
+    "airTemp"
+  ).textContent =
+    "Loading...";
+
+
+  document.getElementById(
+    "wind"
+  ).textContent =
+    "Loading...";
+
+
+  document.getElementById(
+    "pressure"
+  ).textContent =
+    "Loading...";
+
+
+  document.getElementById(
+    "rating"
+  ).textContent =
+    "Loading...";
+
+
+  const url =
+    "https://api.open-meteo.com/v1/forecast" +
+    "?latitude=" + lake.lat +
+    "&longitude=" + lake.lng +
+    "&current=" +
+    "temperature_2m," +
+    "surface_pressure," +
+    "wind_speed_10m," +
+    "wind_direction_10m" +
+    "&temperature_unit=fahrenheit" +
+    "&wind_speed_unit=mph" +
+    "&timezone=auto";
+
+
+  try {
+
+    const response =
+      await fetch(url);
+
+
+    if (!response.ok) {
+
+      throw new Error(
+        "Weather request failed"
+      );
+
+    }
+
+
+    const data =
+      await response.json();
+
+
+    const current =
+      data.current;
+
+
+    const temperature =
+      Number(
+        current.temperature_2m
+      );
+
+
+    const windSpeed =
+      Number(
+        current.wind_speed_10m
+      );
+
+
+    const windDirection =
+      Number(
+        current.wind_direction_10m
+      );
+
+
+    const pressureHpa =
+      Number(
+        current.surface_pressure
+      );
+
+
+    const pressureInHg =
+      pressureToInHg(
+        pressureHpa
+      );
+
+
+    document.getElementById(
+      "airTemp"
+    ).textContent =
+      temperature.toFixed(1) +
+      "°F";
+
+
+    document.getElementById(
+      "wind"
+    ).textContent =
+      degreesToCompass(
+        windDirection
+      ) +
+      " " +
+      windSpeed.toFixed(1) +
+      " MPH";
+
+
+    document.getElementById(
+      "pressure"
+    ).textContent =
+      pressureInHg.toFixed(2) +
+      " inHg";
+
+
+    document.getElementById(
+      "rating"
+    ).textContent =
+      calculateRating(
+        pressureInHg,
+        windSpeed,
+        temperature
+      );
+
+
+  } catch (error) {
+
+    console.error(error);
+
+
+    document.getElementById(
+      "airTemp"
+    ).textContent =
+      "Unavailable";
+
+
+    document.getElementById(
+      "wind"
+    ).textContent =
+      "Unavailable";
+
+
+    document.getElementById(
+      "pressure"
+    ).textContent =
+      "Unavailable";
+
+
+    document.getElementById(
+      "rating"
+    ).textContent =
+      "Weather unavailable";
+
+  }
+
+}
+
+
+/* =========================
+   CHANGE LAKE
+========================= */
 
 function changeLake() {
 
-const id =
-document.getElementById("lake").value;
-
-const lake =
-lakes[id];
+  const id =
+    document.getElementById("lake").value;
 
 
-document.getElementById(
-"lakeName"
-).textContent =
-lake.name;
+  const lake =
+    lakes[id];
 
 
-document.getElementById(
-"waterTemp"
-).textContent =
-lake.temp;
+  document.getElementById(
+    "lakeName"
+  ).textContent =
+    lake.name;
 
 
-document.getElementById(
-"wind"
-).textContent =
-lake.wind;
+  map.setView(
+    [lake.lat, lake.lng],
+    lake.zoom,
+    {
+      animate: true
+    }
+  );
 
 
-document.getElementById(
-"pressure"
-).textContent =
-lake.pressure;
+  makeFishingZones(lake);
 
 
-document.getElementById(
-"rating"
-).textContent =
-lake.rating;
+  loadWeather();
 
 
-map.setView(
-[lake.lat,lake.lng],
-lake.zoom
-);
-
-
-addFishingSpots(lake);
+  document.getElementById(
+    "mapStatus"
+  ).textContent =
+    "Map centered on " +
+    lake.name +
+    ". Use the layers button to turn satellite, street map, FWC bathymetry and bass zones on or off.";
 
 }
 
 
-addFishingSpots(
-lakes.washington
+/* =========================
+   EVENTS
+========================= */
+
+document
+  .getElementById("lake")
+  .addEventListener(
+    "change",
+    changeLake
+  );
+
+
+document
+  .getElementById("refreshWeather")
+  .addEventListener(
+    "click",
+    loadWeather
+  );
+
+
+/* =========================
+   START
+========================= */
+
+makeFishingZones(
+  lakes.washington
 );
+
+
+loadWeather();
+
+
+document.getElementById(
+  "mapStatus"
+).textContent =
+  "Map ready. Open the layers button in the upper-right corner to turn FWC bathymetry on.";
 
 </script>
 
 </body>
-
 </html>
