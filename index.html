@@ -3,248 +3,685 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Florida Big Bass Finder</title>
 
+<link
+rel="stylesheet"
+href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+
 <style>
+
 * {
-  box-sizing: border-box;
+box-sizing:border-box;
 }
 
 body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background: #0b1720;
-  color: white;
+margin:0;
+font-family:Arial,sans-serif;
+background:#0b1720;
+color:white;
 }
 
 header {
-  background: #102c3a;
-  padding: 18px;
-  text-align: center;
-  border-bottom: 2px solid #1f6175;
+background:#102c3a;
+padding:18px;
+text-align:center;
+border-bottom:2px solid #1f6175;
 }
 
 header h1 {
-  margin: 0;
-  font-size: 26px;
+margin:0;
+font-size:25px;
 }
 
 header p {
-  margin: 7px 0 0;
-  color: #b8d6df;
+margin:7px 0 0;
+color:#b8d6df;
 }
 
 .container {
-  max-width: 900px;
-  margin: auto;
-  padding: 15px;
+max-width:950px;
+margin:auto;
+padding:15px;
 }
 
 .card {
-  background: #142832;
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 15px;
-  box-shadow: 0 3px 10px rgba(0,0,0,.35);
+background:#142832;
+border-radius:12px;
+padding:16px;
+margin-bottom:15px;
+box-shadow:0 3px 10px rgba(0,0,0,.35);
 }
 
 label {
-  display: block;
-  margin-bottom: 7px;
-  font-weight: bold;
+display:block;
+font-weight:bold;
+margin-bottom:7px;
 }
 
 select {
-  width: 100%;
-  padding: 13px;
-  border-radius: 8px;
-  border: none;
-  font-size: 16px;
+width:100%;
+padding:13px;
+border-radius:8px;
+border:none;
+font-size:16px;
 }
 
 .conditions {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 10px;
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:10px;
 }
 
 .condition {
-  background: #0d202a;
-  padding: 14px;
-  border-radius: 8px;
+background:#0d202a;
+padding:14px;
+border-radius:8px;
 }
 
 .condition span {
-  display: block;
-  color: #9fc2cc;
-  font-size: 13px;
-  margin-bottom: 5px;
+display:block;
+font-size:13px;
+color:#9fc2cc;
+margin-bottom:5px;
 }
 
-.map {
-  height: 420px;
-  position: relative;
-  overflow: hidden;
-  border-radius: 12px;
-  background:
-    radial-gradient(circle at 25% 35%, #174f63 0 8%, transparent 9%),
-    radial-gradient(circle at 70% 25%, #246b75 0 9%, transparent 10%),
-    radial-gradient(circle at 50% 70%, #155064 0 14%, transparent 15%),
-    radial-gradient(circle at 80% 75%, #246b75 0 7%, transparent 8%),
-    #0a3a4b;
-  border: 2px solid #2a7180;
+.condition strong {
+font-size:17px;
 }
 
-.map-title {
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  background: rgba(0,0,0,.65);
-  padding: 8px 10px;
-  border-radius: 7px;
-  font-weight: bold;
-}
-
-.zone {
-  position: absolute;
-  border-radius: 50%;
-  opacity: .85;
-}
-
-.blue {
-  background: #168cff;
-}
-
-.green {
-  background: #31c96b;
-}
-
-.yellow {
-  background: #e5d62e;
-}
-
-.zone1 {
-  width: 85px;
-  height: 85px;
-  left: 20%;
-  top: 25%;
-}
-
-.zone2 {
-  width: 110px;
-  height: 110px;
-  left: 55%;
-  top: 18%;
-}
-
-.zone3 {
-  width: 75px;
-  height: 75px;
-  left: 42%;
-  top: 62%;
-}
-
-.zone4 {
-  width: 95px;
-  height: 95px;
-  left: 72%;
-  top: 62%;
+#map {
+height:450px;
+width:100%;
+border-radius:10px;
 }
 
 .legend {
-  display: flex;
-  gap: 18px;
-  flex-wrap: wrap;
-  margin-top: 12px;
+display:flex;
+gap:18px;
+flex-wrap:wrap;
+margin-top:12px;
 }
 
 .legend-item {
-  display: flex;
-  align-items: center;
-  gap: 7px;
+display:flex;
+align-items:center;
+gap:7px;
 }
 
 .dot {
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
+width:16px;
+height:16px;
+border-radius:50%;
 }
 
-.blue-dot {
-  background: #168cff;
+.blue {
+background:#168cff;
 }
 
-.green-dot {
-  background: #31c96b;
+.green {
+background:#31c96b;
 }
 
-.yellow-dot {
-  background: #e5d62e;
+.yellow {
+background:#e5d62e;
 }
 
 .note {
-  color: #a9c3cc;
-  font-size: 13px;
-  line-height: 1.5;
+font-size:13px;
+line-height:1.5;
+color:#a9c3cc;
 }
 
-button {
-  width: 100%;
-  padding: 14px;
-  border: none;
-  border-radius: 8px;
-  background: #1d8fbd;
-  color: white;
-  font-size: 16px;
-  font-weight: bold;
-}
-
-button:active {
-  transform: scale(.99);
-}
 </style>
+
 </head>
 
 <body>
 
 <header>
-  <h1>🎣 Florida Big Bass Finder</h1>
-  <p>Find the areas most likely to hold big bass</p>
+
+<h1>🎣 Florida Big Bass Finder</h1>
+
+<p>Find the areas most likely to hold big bass</p>
+
 </header>
 
 <div class="container">
 
-  <div class="card">
-    <label for="lake">Choose a Lake or Chain</label>
+<div class="card">
 
-    <select id="lake" onchange="changeLake()">
-      <option>Lake Washington</option>
-      <option>Lake Poinsett</option>
-      <option>Harris Chain</option>
-      <option>Alligator Chain</option>
-      <option>St. Johns River</option>
-      <option>Lake Kissimmee</option>
-      <option>Blue Cypress Lake</option>
-      <option>Lake George</option>
-      <option>Lake Apopka</option>
-    </select>
-  </div>
+<label for="lake">Choose Lake or Chain</label>
 
-  <div class="card">
-    <h2 id="lakeName">Lake Washington</h2>
+<select id="lake" onchange="changeLake()">
 
-    <div class="conditions">
+<option value="washington">
+Lake Washington
+</option>
 
-      <div class="condition">
-        <span>Water Temperature</span>
-        <strong id="waterTemp">82°F</strong>
-      </div>
+<option value="poinsett">
+Lake Poinsett
+</option>
 
-      <div class="condition">
-        <span>Wind</span>
-        <strong id="wind">SE 8 MPH</strong>
-      </div>
+<option value="harris">
+Harris Chain
+</option>
 
-      <div class="condition">
-        <span>Barometer</span>
-        <strong id="pressure">
+<option value="alligator">
+Alligator Chain
+</option>
+
+<option value="stjohns">
+St. Johns River
+</option>
+
+<option value="kissimmee">
+Lake Kissimmee
+</option>
+
+<option value="bluecypress">
+Blue Cypress Lake
+</option>
+
+<option value="george">
+Lake George
+</option>
+
+<option value="apopka">
+Lake Apopka
+</option>
+
+</select>
+
+</div>
+
+
+<div class="card">
+
+<h2 id="lakeName">Lake Washington</h2>
+
+<div class="conditions">
+
+<div class="condition">
+
+<span>Water Temperature</span>
+
+<strong id="waterTemp">
+82°F
+</strong>
+
+</div>
+
+
+<div class="condition">
+
+<span>Wind</span>
+
+<strong id="wind">
+SE 8 MPH
+</strong>
+
+</div>
+
+
+<div class="condition">
+
+<span>Barometric Pressure</span>
+
+<strong id="pressure">
+30.05 inHg
+</strong>
+
+</div>
+
+
+<div class="condition">
+
+<span>Fishing Rating</span>
+
+<strong id="rating">
+GOOD
+</strong>
+
+</div>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<h2>Map</h2>
+
+<div id="map"></div>
+
+<div class="legend">
+
+<div class="legend-item">
+
+<div class="dot blue"></div>
+
+<span>Trophy Bass</span>
+
+</div>
+
+
+<div class="legend-item">
+
+<div class="dot green"></div>
+
+<span>High Potential</span>
+
+</div>
+
+
+<div class="legend-item">
+
+<div class="dot yellow"></div>
+
+<span>Possible Bass</span>
+
+</div>
+
+</div>
+
+</div>
+
+
+<div class="card">
+
+<h2>🎯 Bass Potential</h2>
+
+<p class="note">
+
+The colored areas are the beginning of our fishing-analysis
+layer. Blue represents the strongest trophy-bass potential,
+green represents high potential, and yellow represents possible
+bass-holding water.
+
+</p>
+
+<p class="note">
+
+The next development step is replacing these demonstration
+locations with actual GIS, depth, structure, vegetation and
+historical bass data.
+
+</p>
+
+</div>
+
+</div>
+
+
+<script
+src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+</script>
+
+
+<script>
+
+const lakes = {
+
+washington: {
+
+name:"Lake Washington",
+
+lat:28.055,
+
+lng:-80.830,
+
+zoom:13,
+
+temp:"82°F",
+
+wind:"SE 8 MPH",
+
+pressure:"30.05 inHg",
+
+rating:"GOOD"
+
+},
+
+poinsett: {
+
+name:"Lake Poinsett",
+
+lat:28.165,
+
+lng:-80.910,
+
+zoom:13,
+
+temp:"83°F",
+
+wind:"SE 7 MPH",
+
+pressure:"30.04 inHg",
+
+rating:"GOOD"
+
+},
+
+harris: {
+
+name:"Harris Chain",
+
+lat:28.780,
+
+lng:-81.850,
+
+zoom:11,
+
+temp:"81°F",
+
+wind:"S 9 MPH",
+
+pressure:"30.02 inHg",
+
+rating:"VERY GOOD"
+
+},
+
+alligator: {
+
+name:"Alligator Chain",
+
+lat:28.160,
+
+lng:-81.600,
+
+zoom:12,
+
+temp:"82°F",
+
+wind:"SE 8 MPH",
+
+pressure:"30.03 inHg",
+
+rating:"GOOD"
+
+},
+
+stjohns: {
+
+name:"St. Johns River",
+
+lat:28.900,
+
+lng:-81.550,
+
+zoom:10,
+
+temp:"81°F",
+
+wind:"S 10 MPH",
+
+pressure:"30.01 inHg",
+
+rating:"VERY GOOD"
+
+},
+
+kissimmee: {
+
+name:"Lake Kissimmee",
+
+lat:27.950,
+
+lng:-81.370,
+
+zoom:12,
+
+temp:"83°F",
+
+wind:"SE 9 MPH",
+
+pressure:"30.04 inHg",
+
+rating:"VERY GOOD"
+
+},
+
+bluecypress: {
+
+name:"Blue Cypress Lake",
+
+lat:27.800,
+
+lng:-80.900,
+
+zoom:12,
+
+temp:"82°F",
+
+wind:"E 8 MPH",
+
+pressure:"30.05 inHg",
+
+rating:"GOOD"
+
+},
+
+george: {
+
+name:"Lake George",
+
+lat:29.520,
+
+lng:-81.650,
+
+zoom:11,
+
+temp:"80°F",
+
+wind:"S 11 MPH",
+
+pressure:"30.00 inHg",
+
+rating:"GOOD"
+
+},
+
+apopka: {
+
+name:"Lake Apopka",
+
+lat:28.620,
+
+lng:-81.600,
+
+zoom:12,
+
+temp:"82°F",
+
+wind:"SW 7 MPH",
+
+pressure:"30.06 inHg",
+
+rating:"GOOD"
+
+}
+
+};
+
+
+const map =
+L.map("map").setView(
+[lakes.washington.lat,lakes.washington.lng],
+lakes.washington.zoom
+);
+
+
+L.tileLayer(
+"https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+{
+
+maxZoom:19,
+
+attribution:
+"&copy; OpenStreetMap contributors"
+
+}
+).addTo(map);
+
+
+let markers = [];
+
+
+function addFishingSpots(lake) {
+
+markers.forEach(marker =>
+map.removeLayer(marker)
+);
+
+markers=[];
+
+
+const spots = [
+
+{
+
+lat:lake.lat+0.015,
+
+lng:lake.lng-0.020,
+
+color:"#168cff",
+
+title:"Trophy Bass Potential"
+
+},
+
+{
+
+lat:lake.lat-0.012,
+
+lng:lake.lng+0.018,
+
+color:"#31c96b",
+
+title:"High Bass Potential"
+
+},
+
+{
+
+lat:lake.lat+0.020,
+
+lng:lake.lng+0.030,
+
+color:"#e5d62e",
+
+title:"Possible Bass"
+
+},
+
+{
+
+lat:lake.lat-0.025,
+
+lng:lake.lng-0.010,
+
+color:"#31c96b",
+
+title:"High Bass Potential"
+
+}
+
+];
+
+
+spots.forEach(spot => {
+
+const marker =
+L.circle(
+[spot.lat,spot.lng],
+{
+
+radius:450,
+
+color:spot.color,
+
+fillColor:spot.color,
+
+fillOpacity:.45
+
+}
+).addTo(map);
+
+
+marker.bindPopup(
+"<b>"+spot.title+"</b><br>"+
+lake.name
+);
+
+
+markers.push(marker);
+
+});
+
+}
+
+
+function changeLake() {
+
+const id =
+document.getElementById("lake").value;
+
+const lake =
+lakes[id];
+
+
+document.getElementById(
+"lakeName"
+).textContent =
+lake.name;
+
+
+document.getElementById(
+"waterTemp"
+).textContent =
+lake.temp;
+
+
+document.getElementById(
+"wind"
+).textContent =
+lake.wind;
+
+
+document.getElementById(
+"pressure"
+).textContent =
+lake.pressure;
+
+
+document.getElementById(
+"rating"
+).textContent =
+lake.rating;
+
+
+map.setView(
+[lake.lat,lake.lng],
+lake.zoom
+);
+
+
+addFishingSpots(lake);
+
+}
+
+
+addFishingSpots(
+lakes.washington
+);
+
+</script>
+
+</body>
+
+</html>
