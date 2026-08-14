@@ -1,395 +1,250 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Florida Big Bass Finder</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Florida Big Bass Finder</title>
 
-  <style>
-    * {
-      box-sizing: border-box;
-    }
+<style>
+* {
+  box-sizing: border-box;
+}
 
-    body {
-      margin: 0;
-      font-family: Arial, sans-serif;
-      background: #0b1720;
-      color: white;
-    }
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #0b1720;
+  color: white;
+}
 
-    header {
-      background: linear-gradient(135deg, #063b2a, #087f5b);
-      padding: 35px 20px;
-      text-align: center;
-    }
+header {
+  background: #102c3a;
+  padding: 18px;
+  text-align: center;
+  border-bottom: 2px solid #1f6175;
+}
 
-    header h1 {
-      margin: 0 0 10px;
-      font-size: 36px;
-    }
+header h1 {
+  margin: 0;
+  font-size: 26px;
+}
 
-    header p {
-      margin: 0;
-      font-size: 17px;
-      color: #d8fff1;
-    }
+header p {
+  margin: 7px 0 0;
+  color: #b8d6df;
+}
 
-    .container {
-      max-width: 1000px;
-      margin: auto;
-      padding: 25px 18px 50px;
-    }
+.container {
+  max-width: 900px;
+  margin: auto;
+  padding: 15px;
+}
 
-    .search-box {
-      background: #142631;
-      padding: 22px;
-      border-radius: 14px;
-      margin-bottom: 25px;
-      box-shadow: 0 5px 20px rgba(0,0,0,.25);
-    }
+.card {
+  background: #142832;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 15px;
+  box-shadow: 0 3px 10px rgba(0,0,0,.35);
+}
 
-    .search-box h2 {
-      margin-top: 0;
-    }
+label {
+  display: block;
+  margin-bottom: 7px;
+  font-weight: bold;
+}
 
-    input {
-      width: 100%;
-      padding: 15px;
-      border: none;
-      border-radius: 8px;
-      font-size: 16px;
-      margin: 8px 0 12px;
-    }
+select {
+  width: 100%;
+  padding: 13px;
+  border-radius: 8px;
+  border: none;
+  font-size: 16px;
+}
 
-    button {
-      width: 100%;
-      padding: 15px;
-      border: none;
-      border-radius: 8px;
-      background: #10b981;
-      color: white;
-      font-size: 17px;
-      font-weight: bold;
-      cursor: pointer;
-    }
+.conditions {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
 
-    button:hover {
-      background: #059669;
-    }
+.condition {
+  background: #0d202a;
+  padding: 14px;
+  border-radius: 8px;
+}
 
-    .lake-card {
-      background: #142631;
-      border-radius: 14px;
-      padding: 20px;
-      margin-bottom: 18px;
-      border-left: 5px solid #10b981;
-    }
+.condition span {
+  display: block;
+  color: #9fc2cc;
+  font-size: 13px;
+  margin-bottom: 5px;
+}
 
-    .lake-card h3 {
-      margin-top: 0;
-      font-size: 24px;
-    }
+.map {
+  height: 420px;
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  background:
+    radial-gradient(circle at 25% 35%, #174f63 0 8%, transparent 9%),
+    radial-gradient(circle at 70% 25%, #246b75 0 9%, transparent 10%),
+    radial-gradient(circle at 50% 70%, #155064 0 14%, transparent 15%),
+    radial-gradient(circle at 80% 75%, #246b75 0 7%, transparent 8%),
+    #0a3a4b;
+  border: 2px solid #2a7180;
+}
 
-    .tag {
-      display: inline-block;
-      background: #075e47;
-      padding: 6px 10px;
-      border-radius: 20px;
-      margin: 4px 4px 4px 0;
-      font-size: 13px;
-    }
+.map-title {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: rgba(0,0,0,.65);
+  padding: 8px 10px;
+  border-radius: 7px;
+  font-weight: bold;
+}
 
-    .score {
-      font-size: 28px;
-      font-weight: bold;
-      color: #34d399;
-    }
+.zone {
+  position: absolute;
+  border-radius: 50%;
+  opacity: .85;
+}
 
-    .info {
-      color: #cbd5e1;
-      line-height: 1.6;
-    }
+.blue {
+  background: #168cff;
+}
 
-    footer {
-      text-align: center;
-      padding: 25px;
-      color: #94a3b8;
-      font-size: 14px;
-    }
+.green {
+  background: #31c96b;
+}
 
-    #results {
-      display: none;
-    }
+.yellow {
+  background: #e5d62e;
+}
 
-    .notice {
-      background: #1e3542;
-      padding: 15px;
-      border-radius: 10px;
-      margin-top: 15px;
-      color: #dbeafe;
-    }
-  </style>
+.zone1 {
+  width: 85px;
+  height: 85px;
+  left: 20%;
+  top: 25%;
+}
+
+.zone2 {
+  width: 110px;
+  height: 110px;
+  left: 55%;
+  top: 18%;
+}
+
+.zone3 {
+  width: 75px;
+  height: 75px;
+  left: 42%;
+  top: 62%;
+}
+
+.zone4 {
+  width: 95px;
+  height: 95px;
+  left: 72%;
+  top: 62%;
+}
+
+.legend {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+}
+
+.blue-dot {
+  background: #168cff;
+}
+
+.green-dot {
+  background: #31c96b;
+}
+
+.yellow-dot {
+  background: #e5d62e;
+}
+
+.note {
+  color: #a9c3cc;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+button {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 8px;
+  background: #1d8fbd;
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+}
+
+button:active {
+  transform: scale(.99);
+}
+</style>
 </head>
 
 <body>
 
 <header>
   <h1>🎣 Florida Big Bass Finder</h1>
-  <p>Find promising Florida bass waters and learn where to start fishing.</p>
+  <p>Find the areas most likely to hold big bass</p>
 </header>
 
 <div class="container">
 
-  <div class="search-box">
-    <h2>Find Your Lake</h2>
-    <p class="info">
-      Enter a Florida lake, river, or fishing area below.
-    </p>
+  <div class="card">
+    <label for="lake">Choose a Lake or Chain</label>
 
-    <input
-      type="text"
-      id="lakeSearch"
-      placeholder="Example: Lake Washington"
-    >
-
-    <button onclick="findLake()">Find Fishing Information</button>
-
-    <div class="notice">
-      Start with a lake name. More lakes, fishing conditions, maps,
-      seasonal patterns, and bass locations can be added to this app.
-    </div>
+    <select id="lake" onchange="changeLake()">
+      <option>Lake Washington</option>
+      <option>Lake Poinsett</option>
+      <option>Harris Chain</option>
+      <option>Alligator Chain</option>
+      <option>St. Johns River</option>
+      <option>Lake Kissimmee</option>
+      <option>Blue Cypress Lake</option>
+      <option>Lake George</option>
+      <option>Lake Apopka</option>
+    </select>
   </div>
 
-  <div id="results"></div>
+  <div class="card">
+    <h2 id="lakeName">Lake Washington</h2>
 
-  <div id="featured">
+    <div class="conditions">
 
-    <div class="lake-card">
-      <h3>Lake Washington</h3>
-
-      <div class="score">Big Bass Potential: ★★★★☆</div>
-
-      <p class="info">
-        A shallow Florida lake with vegetation, baitfish, and areas where
-        largemouth bass can position to ambush prey.
-      </p>
-
-      <span class="tag">Largemouth Bass</span>
-      <span class="tag">Shallow Water</span>
-      <span class="tag">Vegetation</span>
-      <span class="tag">Baitfish</span>
-
-      <p class="info">
-        <strong>Starting areas:</strong><br>
-        Look for points, grass edges, pockets, current, baitfish activity,
-        and places where deeper water meets shallow feeding areas.
-      </p>
-    </div>
-
-    <div class="lake-card">
-      <h3>Lake Kissimmee</h3>
-
-      <div class="score">Big Bass Potential: ★★★★★</div>
-
-      <p class="info">
-        One of Florida's famous largemouth bass fisheries. Vegetation,
-        offshore structure, spawning areas, and baitfish can all influence
-        where larger bass position.
-      </p>
-
-      <span class="tag">Big Bass</span>
-      <span class="tag">Grass</span>
-      <span class="tag">Shiners</span>
-      <span class="tag">Structure</span>
-
-      <p class="info">
-        <strong>Starting areas:</strong><br>
-        Check vegetation edges, points, cuts, deeper water near feeding
-        areas, and locations holding baitfish.
-      </p>
-    </div>
-
-    <div class="lake-card">
-      <h3>St. Johns River</h3>
-
-      <div class="score">Big Bass Potential: ★★★★★</div>
-
-      <p class="info">
-        The St. Johns system contains a huge variety of bass habitat.
-        Current, vegetation, canals, creek mouths, bends, and baitfish
-        can create excellent ambush locations.
-      </p>
-
-      <span class="tag">River</span>
-      <span class="tag">Current</span>
-      <span class="tag">Vegetation</span>
-      <span class="tag">Structure</span>
-
-      <p class="info">
-        <strong>Starting areas:</strong><br>
-        Focus on current breaks, creek mouths, points, vegetation edges,
-        and areas where baitfish concentrate.
-      </p>
-    </div>
-
-  </div>
-
-</div>
-
-<footer>
-  Florida Big Bass Finder © 2026
-</footer>
-
-<script>
-
-const lakes = {
-
-  "lake washington": {
-    name: "Lake Washington",
-    score: "★★★★☆",
-    tags: ["Largemouth Bass", "Shallow Water", "Vegetation", "Baitfish"],
-    description:
-      "A shallow Florida lake with vegetation, baitfish, and ambush areas that can hold largemouth bass.",
-    starting:
-      "Check points, grass edges, pockets, current, baitfish activity, and places where deeper water meets shallow feeding areas."
-  },
-
-  "lake kissimmee": {
-    name: "Lake Kissimmee",
-    score: "★★★★★",
-    tags: ["Big Bass", "Grass", "Shiners", "Structure"],
-    description:
-      "A famous Florida largemouth bass fishery with extensive vegetation, structure, and baitfish.",
-    starting:
-      "Check vegetation edges, points, cuts, deeper water near feeding areas, and locations holding baitfish."
-  },
-
-  "st johns river": {
-    name: "St. Johns River",
-    score: "★★★★★",
-    tags: ["River", "Current", "Vegetation", "Structure"],
-    description:
-      "A large Florida bass system with current, vegetation, canals, creek mouths, bends, and abundant habitat.",
-    starting:
-      "Focus on current breaks, creek mouths, points, vegetation edges, and areas where baitfish concentrate."
-  }
-
-};
-
-function findLake() {
-
-  const search =
-    document.getElementById("lakeSearch")
-      .value
-      .toLowerCase()
-      .trim();
-
-  const results =
-    document.getElementById("results");
-
-  const featured =
-    document.getElementById("featured");
-
-  if (search === "") {
-
-    results.style.display = "block";
-
-    results.innerHTML = `
-      <div class="lake-card">
-        <h3>Enter a lake name</h3>
-        <p class="info">
-          Type a Florida lake or river into the search box.
-        </p>
-      </div>
-    `;
-
-    featured.style.display = "none";
-    return;
-  }
-
-  let lake = lakes[search];
-
-  if (!lake) {
-
-    for (const key in lakes) {
-
-      if (
-        key.includes(search) ||
-        lakes[key].name.toLowerCase().includes(search)
-      ) {
-        lake = lakes[key];
-        break;
-      }
-
-    }
-
-  }
-
-  featured.style.display = "none";
-  results.style.display = "block";
-
-  if (!lake) {
-
-    results.innerHTML = `
-      <div class="lake-card">
-        <h3>Lake Not Yet Added</h3>
-
-        <p class="info">
-          We don't have detailed information for
-          <strong>${escapeHtml(search)}</strong>
-          in this first version.
-        </p>
-
-        <p class="info">
-          This is where the full Florida Big Bass Finder database
-          will eventually provide fishing information.
-        </p>
-      </div>
-    `;
-
-    return;
-  }
-
-  results.innerHTML = `
-
-    <div class="lake-card">
-
-      <h3>${lake.name}</h3>
-
-      <div class="score">
-        Big Bass Potential: ${lake.score}
+      <div class="condition">
+        <span>Water Temperature</span>
+        <strong id="waterTemp">82°F</strong>
       </div>
 
-      <p class="info">
-        ${lake.description}
-      </p>
+      <div class="condition">
+        <span>Wind</span>
+        <strong id="wind">SE 8 MPH</strong>
+      </div>
 
-      ${lake.tags.map(tag =>
-        `<span class="tag">${tag}</span>`
-      ).join("")}
-
-      <p class="info">
-        <strong>Where to start:</strong><br>
-        ${lake.starting}
-      </p>
-
-    </div>
-
-  `;
-
-}
-
-function escapeHtml(text) {
-
-  const div = document.createElement("div");
-
-  div.textContent = text;
-
-  return div.innerHTML;
-
-}
-
-</script>
-
-</body>
-</html>
+      <div class="condition">
+        <span>Barometer</span>
+        <strong id="pressure">
