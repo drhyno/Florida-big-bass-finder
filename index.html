@@ -1,11 +1,11 @@
+=== */
 <!DOCTYPE html>
 <html lang="en">
 <head>
 
 <meta charset="UTF-8">
 
-<meta name="viewport"
-content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Florida Big Bass Finder</title>
 
@@ -31,7 +31,7 @@ body {
 margin:0;
 font-family:Arial,Helvetica,sans-serif;
 background:#07141b;
-color:#fff;
+color:white;
 }
 
 header {
@@ -81,7 +81,7 @@ padding:13px;
 border:0;
 border-radius:8px;
 font-size:16px;
-background:#fff;
+background:white;
 color:#111;
 }
 
@@ -125,38 +125,6 @@ font-size:13px;
 line-height:1.5;
 }
 
-.legend {
-display:flex;
-flex-wrap:wrap;
-gap:15px;
-margin-top:12px;
-}
-
-.legendItem {
-display:flex;
-align-items:center;
-gap:7px;
-font-size:14px;
-}
-
-.dot {
-width:16px;
-height:16px;
-border-radius:50%;
-}
-
-.blue {
-background:#168cff;
-}
-
-.green {
-background:#24c96b;
-}
-
-.yellow {
-background:#e4d326;
-}
-
 .note {
 color:#aac4cc;
 font-size:13px;
@@ -173,10 +141,6 @@ color:white;
 font-weight:bold;
 font-size:16px;
 margin-top:12px;
-}
-
-button:active {
-transform:scale(.99);
 }
 
 .leaflet-control-layers {
@@ -270,7 +234,6 @@ Lake Washington
 
 <div class="conditions">
 
-
 <div class="condition">
 
 <span>
@@ -322,7 +285,6 @@ Loading...
 
 </div>
 
-
 </div>
 
 
@@ -339,50 +301,12 @@ Refresh Current Conditions
 🗺️ Fishing Map
 </h2>
 
-<div id="map">
-</div>
+<div id="map"></div>
 
 <div id="mapStatus"
 class="status">
 
 Loading map...
-
-</div>
-
-
-<div class="legend">
-
-<div class="legendItem">
-
-<div class="dot blue"></div>
-
-<span>
-Trophy Bass Potential
-</span>
-
-</div>
-
-
-<div class="legendItem">
-
-<div class="dot green"></div>
-
-<span>
-High Potential
-</span>
-
-</div>
-
-
-<div class="legendItem">
-
-<div class="dot yellow"></div>
-
-<span>
-Possible Bass
-</span>
-
-</div>
 
 </div>
 
@@ -397,18 +321,18 @@ Possible Bass
 
 <p class="note">
 
-Blue will eventually represent trophy-bass
-potential, green high potential, and yellow
-possible bass-holding areas.
+The map now uses verified lake locations. The
+next stage is adding actual lake boundaries,
+depth contours, structure, vegetation and
+bass-holding analysis.
 
 </p>
 
 <p class="note">
 
-For this version, we are not displaying fake
-fishing locations. The map and bathymetry are
-the foundation for the actual bass-analysis
-system.
+We are deliberately not putting fake bass
+locations on the map. A colored dot sitting
+in a cow pasture isn't a fishing pattern.
 
 </p>
 
@@ -422,9 +346,8 @@ system.
 
 
 /* =========================================
-   FLORIDA LAKE DATABASE
+   VERIFIED LAKE LOCATIONS
 ========================================= */
-
 
 const lakes = {
 
@@ -433,11 +356,11 @@ washington: {
 
 name:"Lake Washington",
 
-lat:28.1530,
+lat:28.1440405,
 
-lng:-80.7430,
+lng:-80.7455146,
 
-zoom:13
+zoom:14
 
 },
 
@@ -446,9 +369,9 @@ poinsett: {
 
 name:"Lake Poinsett",
 
-lat:28.1650,
+lat:28.3380228,
 
-lng:-80.9100,
+lng:-80.8331575,
 
 zoom:13
 
@@ -461,9 +384,9 @@ name:"Harris Chain",
 
 lat:28.7800,
 
-lng:-81.8500,
+lng:-81.8000,
 
-zoom:11
+zoom:12
 
 },
 
@@ -485,9 +408,9 @@ stjohns: {
 
 name:"St. Johns River",
 
-lat:28.9000,
+lat:28.7000,
 
-lng:-81.5500,
+lng:-81.5000,
 
 zoom:10
 
@@ -498,11 +421,11 @@ kissimmee: {
 
 name:"Lake Kissimmee",
 
-lat:27.9500,
+lat:27.91069479,
 
-lng:-81.3700,
+lng:-81.26696157,
 
-zoom:12
+zoom:13
 
 },
 
@@ -511,11 +434,11 @@ bluecypress: {
 
 name:"Blue Cypress Lake",
 
-lat:27.8000,
+lat:27.72669646,
 
-lng:-80.9000,
+lng:-80.77478105,
 
-zoom:12
+zoom:13
 
 },
 
@@ -524,11 +447,11 @@ george: {
 
 name:"Lake George",
 
-lat:29.5200,
+lat:29.28570622,
 
-lng:-81.6500,
+lng:-81.59595839,
 
-zoom:11
+zoom:12
 
 },
 
@@ -537,9 +460,9 @@ apopka: {
 
 name:"Lake Apopka",
 
-lat:28.6200,
+lat:28.62397977,
 
-lng:-81.6000,
+lng:-81.62614789,
 
 zoom:12
 
@@ -553,27 +476,16 @@ zoom:12
    CREATE MAP
 ========================================= */
 
-
 const map = L.map("map", {
 
 zoomControl:true
 
-}).setView(
-
-[
-lakes.washington.lat,
-lakes.washington.lng
-],
-
-lakes.washington.zoom
-
-);
+});
 
 
 /* =========================================
-   STREET MAP
+   MAP LAYERS
 ========================================= */
-
 
 const streetMap = L.tileLayer(
 
@@ -589,11 +501,6 @@ attribution:
 }
 
 );
-
-
-/* =========================================
-   SATELLITE
-========================================= */
 
 
 const satelliteMap = L.tileLayer(
@@ -613,17 +520,8 @@ attribution:
 
 
 /* =========================================
-   START WITH SATELLITE
-========================================= */
-
-
-satelliteMap.addTo(map);
-
-
-/* =========================================
    FWC BATHYMETRY
 ========================================= */
-
 
 const fwcBathymetry =
 
@@ -643,17 +541,8 @@ attribution:
 
 
 /* =========================================
-   FISHING ANALYSIS PLACEHOLDER
+   MAP LAYERS CONTROL
 ========================================= */
-
-
-const fishingAnalysis = L.layerGroup();
-
-
-/* =========================================
-   LAYER CONTROL
-========================================= */
-
 
 const baseMaps = {
 
@@ -666,9 +555,7 @@ const baseMaps = {
 
 const overlays = {
 
-"FWC Bathymetry":fwcBathymetry,
-
-"Bass Analysis":fishingAnalysis
+"FWC Bathymetry":fwcBathymetry
 
 };
 
@@ -689,9 +576,56 @@ collapsed:false
 
 
 /* =========================================
-   WEATHER
+   CENTER MAP ON LAKE
 ========================================= */
 
+function centerOnLake(id) {
+
+const lake =
+lakes[id];
+
+
+map.setView(
+
+[
+lake.lat,
+lake.lng
+],
+
+lake.zoom,
+
+{
+
+animate:true
+
+}
+
+);
+
+
+document.getElementById(
+"lakeName"
+).textContent =
+lake.name;
+
+
+document.getElementById(
+"mapStatus"
+).textContent =
+
+"Centered on " +
+lake.name +
+". Satellite imagery is active. Open the layers control to turn FWC bathymetry on or off.";
+
+
+loadWeather();
+
+}
+
+
+/* =========================================
+   WEATHER FUNCTIONS
+========================================= */
 
 function degreesToCompass(degrees) {
 
@@ -790,9 +724,8 @@ return "FAIR";
 
 
 /* =========================================
-   LOAD CURRENT WEATHER
+   CURRENT WEATHER
 ========================================= */
-
 
 async function loadWeather() {
 
@@ -938,6 +871,7 @@ document.getElementById(
 ).textContent =
 
 pressureInHg.toFixed(2) +
+
 " inHg";
 
 
@@ -991,9 +925,58 @@ document.getElementById(
 
 
 /* =========================================
-   CHANGE LAKE
+   LAKE SELECTOR
 ========================================= */
 
+document
+.getElementById("lake")
+.addEventListener(
+
+"change",
+
+function() {
+
+centerOnLake(
+this.value
+);
+
+}
+
+);
+
+
+/* =========================================
+   REFRESH WEATHER
+========================================= */
+
+document
+.getElementById("refreshWeather")
+.addEventListener(
+
+"click",
+
+loadWeather
+
+);
+
+
+/* =========================================
+   STARTUP
+========================================= */
+
+satelliteMap.addTo(map);
+
+
+centerOnLake(
+"washington"
+);
+
+
+</script>
+
+</body>
+
+</html>
 
 function changeLake() {
 
