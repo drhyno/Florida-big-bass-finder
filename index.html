@@ -1157,24 +1157,272 @@ async function loadPredictions(lake){
         );
 
 
-        predictionLayer.addLayer(marker);
+async function loadPredictions(lake){
 
-        chosen.push(c);
+  predictionLayer.clearLayers();
+
+  let count = 0;
+
+  /*
+     Create calculated fishing areas from
+     the actual FWC bathymetry polygons.
+
+     These are SEARCH AREAS, not claims that
+     a bass is definitely sitting there.
+  */
+
+  for(const name of lake.names){
+
+    try{
+
+      const safe =
+      name.replace(/'/g,"''");
+
+      const data =
+      await fwcQuery(
+        BATHY,
+        "Waterbody='"+safe+"'",
+        "Waterbody,Depth_Feet"
+      );
+
+      if(!data.features){
+        continue;
+      }
+
+
+      /*
+         Look at every bathymetry polygon.
+      */
+
+      for(const feature of data.features){
+
+        const depth =
+        Math.abs(
+          Number(
+            feature.properties.Depth_Feet
+          )
+        );
+
+        if(!Number.isFinite(depth)){
+          continue;
+        }
+
+
+        const polygon =
+        L.geoJSON(feature);
+
+
+        const bounds =
+        polygon.getBounds();
+
+
+        if(!bounds.isValid()){
+          continue;
+        }
+
+
+        const center =
+        bounds.getCenter();
+
+
+        /*
+           Ignore extremely shallow water.
+        */
+
+        if(depth < 3){
+          continue;
+        }
+
+
+        let color;
+        let title;
+        let score;
+        let reason;
+
+
+        /*
+           DEEP WATER
+        */
+
+        if(depth >= 15){
+
+          color = "#0066ff";
+
+          title =
+          "🔵 STRONG TROPHY POTENTIAL";
+
+          score = 85;
+
+          reason =
+          "Deep-water holding area. Look for nearby depth changes, vegetation, bait and current.";
+
+        }
+
+
+        /*
+           MID-DEPTH
+        */
+
+        else if(depth >= 8){
+
+          color = "#00c853";
+
+          title =
+          "🟢 HIGH BASS POTENTIAL";
+
+          score = 72;
+
+          reason =
+          "Potential staging/ambush depth. Check nearby shallow water and structure.";
+
+        }
+
+
+        /*
+           SHALLOW TRANSITION
+        */
+
+        else {
+
+          color = "#ffd400";
+
+          title =
+          "🟡 SECONDARY POTENTIAL";
+
+          score = 58;
+
+          reason =
+          "Shallow-to-mid depth area that may become important when bass move shallow.";
+
+        }
+
+
+        /*
+           Don't put every polygon on the screen.
+           Only show representative locations.
+        */
+
+        let tooClose = false;
+
+
+        for(
+          const existing
+          of predictionLayer.getLayers()
+        ){
+
+          const existingLatLng =
+          existing.getLatLng();
+
+
+          const distance =
+          map.distance(
+            center,
+            existingLatLng
+          );
+
+
+          if(distance < 250){
+
+            tooClose = true;
+            break;
+
+          }
+
+        }
+
+
+        if(tooClose){
+          continue;
+        }
+
+
+        const marker =
+        L.circleMarker(
+          center,
+          {
+            radius:11,
+            color:"#ffffff",
+            weight:2,
+            fillColor:color,
+            fillOpacity:.90
+          }
+        );
+
+
+        marker.bindPopup(
+
+          "<strong>"+
+          title+
+          "</strong>"+
+
+          "<br><br>"+
+
+          "<strong>Predicted score:</strong> "+
+          score+
+          "/100"+
+
+          "<br>"+
+
+          "<strong>Depth:</strong> "+
+          depth+
+          " feet"+
+
+          "<br><br>"+
+
+          reason+
+
+          "<br><br>"+
+
+          "<em>"+
+          "Calculated fishing area. "+
+          "Not a guaranteed fish location."+
+          "</em>"
+
+        );
+
+
+        predictionLayer.addLayer(marker);
 
         count++;
 
+
+        /*
+           Limit the number of points so
+           the lake doesn't become a Christmas tree.
+        */
+
+        if(count >= 30){
+          break;
+        }
+
       }
 
-    }catch(error){
+
+      if(count >= 30){
+        break;
+      }
+
+
+    }
+    catch(error){
 
       console.log(
-        "Prediction unavailable for "+name,
+        "Prediction error:",
+        name,
         error
       );
 
     }
 
   }
+
+
+  /*
+     Make sure the colored prediction dots
+     actually appear on the map.
+  */
+
+  predictionLayer.addTo(map);
 
 
   return count;
