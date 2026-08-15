@@ -5,7 +5,7 @@
 <meta charset="UTF-8">
 
 <meta name="viewport"
-content="width=device-width,initial-scale=1.0">
+content="width=device-width, initial-scale=1.0">
 
 <title>Florida Big Bass Finder</title>
 
@@ -23,7 +23,7 @@ html,body{
 margin:0;
 padding:0;
 background:#07141b;
-color:white;
+color:#fff;
 font-family:Arial,Helvetica,sans-serif;
 }
 
@@ -36,7 +36,7 @@ border-bottom:2px solid #23677b;
 
 header h1{
 margin:0;
-font-size:25px;
+font-size:26px;
 }
 
 header p{
@@ -74,7 +74,7 @@ padding:13px;
 border:0;
 border-radius:8px;
 font-size:16px;
-background:white;
+background:#fff;
 color:#111;
 }
 
@@ -189,7 +189,11 @@ font-weight:bold;
 
 .bassPopup{
 font-size:14px;
-line-height:1.4;
+line-height:1.45;
+}
+
+.loading{
+opacity:.7;
 }
 
 @media(max-width:600px){
@@ -199,7 +203,7 @@ height:430px;
 }
 
 header h1{
-font-size:21px;
+font-size:22px;
 }
 
 .mapButtons{
@@ -218,7 +222,7 @@ grid-template-columns:1fr 1fr;
 
 <h1>🎣 Florida Big Bass Finder</h1>
 
-<p>Find areas most likely to hold big bass</p>
+<p>Find the water most likely to hold big bass</p>
 
 </header>
 
@@ -272,6 +276,7 @@ Lake Apopka
 
 </div>
 
+
 <div class="card">
 
 <h2 id="lakeName">
@@ -282,7 +287,9 @@ Lake Washington
 
 <div class="condition">
 
-<span>Air Temperature</span>
+<span>
+Air Temperature
+</span>
 
 <strong id="airTemp">
 Loading...
@@ -290,9 +297,12 @@ Loading...
 
 </div>
 
+
 <div class="condition">
 
-<span>Wind</span>
+<span>
+Wind
+</span>
 
 <strong id="wind">
 Loading...
@@ -300,9 +310,12 @@ Loading...
 
 </div>
 
+
 <div class="condition">
 
-<span>Barometric Pressure</span>
+<span>
+Barometric Pressure
+</span>
 
 <strong id="pressure">
 Loading...
@@ -310,9 +323,12 @@ Loading...
 
 </div>
 
+
 <div class="condition">
 
-<span>Fishing Rating</span>
+<span>
+Fishing Rating
+</span>
 
 <strong id="rating">
 Loading...
@@ -321,6 +337,7 @@ Loading...
 </div>
 
 </div>
+
 
 <button
 id="refreshWeather"
@@ -332,9 +349,13 @@ Refresh Current Conditions
 
 </div>
 
+
 <div class="card">
 
-<h2>🗺️ Fishing Map</h2>
+<h2>
+🗺️ Fishing Map
+</h2>
+
 
 <div class="mapButtons">
 
@@ -346,12 +367,14 @@ class="active">
 
 </button>
 
+
 <button
 id="streetButton">
 
 🗺️ Street
 
 </button>
+
 
 <button
 id="bottomButton">
@@ -360,6 +383,7 @@ id="bottomButton">
 
 </button>
 
+
 <button
 id="depthButton">
 
@@ -367,12 +391,14 @@ id="depthButton">
 
 </button>
 
+
 <button
 id="bassButton">
 
 🎯 Target Bass
 
 </button>
+
 
 <button
 id="windButton">
@@ -383,7 +409,9 @@ id="windButton">
 
 </div>
 
+
 <div id="map"></div>
+
 
 <div class="legend">
 
@@ -397,7 +425,7 @@ Purple = FWC fish attractor
 <br>
 
 <span class="dot blue"></span>
-Blue = high trophy potential
+Blue = highest predicted trophy potential
 
 <br>
 
@@ -416,6 +444,7 @@ Orange arrows = wind direction
 
 </div>
 
+
 <div
 id="mapStatus"
 class="status">
@@ -426,18 +455,19 @@ Starting map...
 
 </div>
 
+
 <div class="card">
 
-<h2>🎯 Bass Finder</h2>
+<h2>
+🎯 Bass Finder
+</h2>
 
 <p class="status">
 
-The colored bass areas are predictions based on
-available lake information, structure, depth,
-shoreline configuration, vegetation potential,
+Target Bass areas are predictions, not guaranteed
+fish locations. The system considers available
+bathymetry, depth, depth changes, location,
 wind exposure and bass ambush behavior.
-
-They are NOT guaranteed fish locations.
 
 </p>
 
@@ -445,76 +475,115 @@ They are NOT guaranteed fish locations.
 
 </div>
 
+
 <script
 src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
 </script>
 
+
+<script
+src="https://unpkg.com/esri-leaflet@3.0.19/dist/esri-leaflet.js">
+</script>
+
+
 <script>
+
+/* =====================================================
+   LAKE DATABASE
+===================================================== */
 
 const lakes={
 
 "Lake Washington":{
 lat:28.1440,
 lon:-80.7455,
-zoom:13
+zoom:13,
+search:"Lake Washington"
 },
 
 "Lake Poinsett":{
 lat:28.3380,
 lon:-80.8331,
-zoom:13
+zoom:13,
+search:"Lake Poinsett"
 },
 
 "Harris Chain":{
 lat:28.7800,
 lon:-81.8000,
-zoom:11
+zoom:11,
+search:""
 },
 
 "Alligator Chain":{
 lat:28.1600,
 lon:-81.6000,
-zoom:11
+zoom:11,
+search:""
 },
 
 "St. Johns River":{
 lat:28.7000,
 lon:-81.5000,
-zoom:10
+zoom:10,
+search:""
 },
 
 "Lake Kissimmee":{
 lat:27.9107,
 lon:-81.2670,
-zoom:12
+zoom:12,
+search:"Lake Kissimmee"
 },
 
 "Blue Cypress Lake":{
 lat:27.7267,
 lon:-80.7748,
-zoom:13
+zoom:13,
+search:"Blue Cypress Lake"
 },
 
 "Lake George":{
 lat:29.2857,
 lon:-81.5960,
-zoom:12
+zoom:12,
+search:"Lake George"
 },
 
 "Lake Apopka":{
 lat:28.6240,
 lon:-81.6261,
-zoom:12
+zoom:12,
+search:"Lake Apopka"
 }
 
 };
 
 
 /* =====================================================
+   FWC SERVICES
+===================================================== */
+
+const FWC_BATHY_URL=
+"https://ocean.floridamarine.org/arcgis/rest/services/Projects_FWC/WhatsHappeningOnMyLake/MapServer";
+
+const FWC_ATTRACTOR_URL=
+"https://ocean.floridamarine.org/arcgis/rest/services/Projects_FWC/WhatsHappeningOnMyLake/MapServer";
+
+
+/*
+   Layer 30 = Bathymetry Contours
+   Layer 31 = Lakes Bathymetry
+   Layer 11 = Fish Attractors
+*/
+
+
+/* =====================================================
    MAP
 ===================================================== */
 
-const map=L.map("map",{
+const map=
+L.map("map",{
 
 zoomControl:true,
 preferCanvas:true
@@ -526,28 +595,34 @@ preferCanvas:true
    BASE MAPS
 ===================================================== */
 
-const satellite=L.tileLayer(
+const satellite=
+L.tileLayer(
 
 "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
 
 {
 
 maxZoom:19,
-attribution:"Tiles © Esri"
+
+attribution:
+"Tiles © Esri"
 
 }
 
 );
 
 
-const street=L.tileLayer(
+const street=
+L.tileLayer(
 
 "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
 
 {
 
 maxZoom:19,
-attribution:"© OpenStreetMap contributors"
+
+attribution:
+"© OpenStreetMap contributors"
 
 }
 
@@ -558,47 +633,52 @@ satellite.addTo(map);
 
 
 /* =====================================================
-   OPTIONAL FWC LAYERS
+   OPTIONAL LAYERS
 ===================================================== */
-
-const FWC_BATHY=
-
-"https://ocean.floridamarine.org/arcgis/rest/services/Projects_FWC/WHOML_bathymetryService/MapServer";
-
-
-const FWC_CONTOUR=
-
-"https://ocean.floridamarine.org/arcgis/rest/services/Projects_FWC/WhatsHappeningOnMyLake/MapServer";
-
 
 let bottomLayer=null;
+
 let depthLayer=null;
 
+let attractorLayer=
+L.layerGroup();
 
-/* =====================================================
-   OVERLAY GROUPS
-===================================================== */
+let bassLayer=
+L.layerGroup();
 
-const attractorLayer=L.layerGroup();
-
-const bassLayer=L.layerGroup();
-
-const windLayer=L.layerGroup();
+let windLayer=
+L.layerGroup();
 
 
 let bottomOn=false;
+
 let depthOn=false;
+
 let bassOn=false;
+
 let windOn=false;
 
 let currentWindDirection=0;
 
 
 /* =====================================================
+   STATUS
+===================================================== */
+
+function setStatus(text){
+
+document
+.getElementById("mapStatus")
+.textContent=text;
+
+}
+
+
+/* =====================================================
    BUTTON STATE
 ===================================================== */
 
-function activeButton(id,state){
+function setActive(id,state){
 
 const button=
 document.getElementById(id);
@@ -623,13 +703,11 @@ button.classList.remove("active");
 
 document
 .getElementById("satelliteButton")
-.addEventListener("click",function(){
-
-if(!map.hasLayer(satellite)){
+.addEventListener(
+"click",
+function(){
 
 satellite.addTo(map);
-
-}
 
 if(map.hasLayer(street)){
 
@@ -637,19 +715,20 @@ map.removeLayer(street);
 
 }
 
-activeButton(
+setActive(
 "satelliteButton",
 true
 );
 
-activeButton(
+setActive(
 "streetButton",
 false
 );
 
 map.invalidateSize();
 
-});
+}
+);
 
 
 /* =====================================================
@@ -658,13 +737,11 @@ map.invalidateSize();
 
 document
 .getElementById("streetButton")
-.addEventListener("click",function(){
-
-if(!map.hasLayer(street)){
+.addEventListener(
+"click",
+function(){
 
 street.addTo(map);
-
-}
 
 if(map.hasLayer(satellite)){
 
@@ -672,19 +749,20 @@ map.removeLayer(satellite);
 
 }
 
-activeButton(
+setActive(
 "streetButton",
 true
 );
 
-activeButton(
+setActive(
 "satelliteButton",
 false
 );
 
 map.invalidateSize();
 
-});
+}
+);
 
 
 /* =====================================================
@@ -693,11 +771,13 @@ map.invalidateSize();
 
 document
 .getElementById("bottomButton")
-.addEventListener("click",async function(){
+.addEventListener(
+"click",
+function(){
 
 bottomOn=!bottomOn;
 
-activeButton(
+setActive(
 "bottomButton",
 bottomOn
 );
@@ -706,21 +786,25 @@ if(!bottomOn){
 
 if(bottomLayer){
 
-map.removeLayer(bottomLayer);
+map.removeLayer(
+bottomLayer
+);
 
 }
 
-status(
-"Bottom map turned OFF."
+setStatus(
+"Bottom map OFF."
 );
 
 return;
 
 }
 
-status(
-"Loading FWC bottom map..."
+
+setStatus(
+"Loading FWC bathymetry..."
 );
+
 
 try{
 
@@ -729,9 +813,9 @@ if(!bottomLayer){
 bottomLayer=
 L.esri.dynamicMapLayer({
 
-url:FWC_BATHY,
+url:FWC_BATHY_URL,
 
-layers:[3],
+layers:[31],
 
 opacity:.75,
 
@@ -748,8 +832,8 @@ bottomLayer.addTo(map);
 
 bottomLayer.bringToFront();
 
-status(
-"FWC bottom map turned ON."
+setStatus(
+"FWC bathymetry is ON."
 );
 
 }
@@ -757,26 +841,27 @@ status(
 catch(error){
 
 console.log(
-"Bottom map error:",
+"Bottom error",
 error
 );
 
 bottomOn=false;
 
-activeButton(
+setActive(
 "bottomButton",
 false
 );
 
-status(
-"FWC bottom map is unavailable right now. Regular map is still working."
+setStatus(
+"FWC bathymetry could not be loaded."
 );
 
 }
 
 map.invalidateSize();
 
-});
+}
+);
 
 
 /* =====================================================
@@ -785,11 +870,13 @@ map.invalidateSize();
 
 document
 .getElementById("depthButton")
-.addEventListener("click",async function(){
+.addEventListener(
+"click",
+function(){
 
 depthOn=!depthOn;
 
-activeButton(
+setActive(
 "depthButton",
 depthOn
 );
@@ -798,21 +885,25 @@ if(!depthOn){
 
 if(depthLayer){
 
-map.removeLayer(depthLayer);
+map.removeLayer(
+depthLayer
+);
 
 }
 
-status(
-"Depth lines turned OFF."
+setStatus(
+"Depth lines OFF."
 );
 
 return;
 
 }
 
-status(
+
+setStatus(
 "Loading FWC depth contours..."
 );
+
 
 try{
 
@@ -821,7 +912,7 @@ if(!depthLayer){
 depthLayer=
 L.esri.dynamicMapLayer({
 
-url:FWC_CONTOUR,
+url:FWC_BATHY_URL,
 
 layers:[30],
 
@@ -840,8 +931,8 @@ depthLayer.addTo(map);
 
 depthLayer.bringToFront();
 
-status(
-"FWC depth contour lines turned ON."
+setStatus(
+"FWC depth contour lines are ON."
 );
 
 }
@@ -849,26 +940,27 @@ status(
 catch(error){
 
 console.log(
-"Depth line error:",
+"Depth error",
 error
 );
 
 depthOn=false;
 
-activeButton(
+setActive(
 "depthButton",
 false
 );
 
-status(
-"Depth lines are unavailable right now."
+setStatus(
+"FWC depth contours unavailable."
 );
 
 }
 
 map.invalidateSize();
 
-});
+}
+);
 
 
 /* =====================================================
@@ -878,8 +970,14 @@ map.invalidateSize();
 function compass(degrees){
 
 const directions=[
-"N","NE","E","SE",
-"S","SW","W","NW"
+"N",
+"NE",
+"E",
+"SE",
+"S",
+"SW",
+"W",
+"NW"
 ];
 
 return directions[
@@ -892,7 +990,9 @@ Math.round(degrees/45)%8
 function loadWeather(){
 
 const lakeName=
-document.getElementById("lake").value;
+document
+.getElementById("lake")
+.value;
 
 const lake=
 lakes[lakeName];
@@ -903,17 +1003,29 @@ return;
 
 }
 
-document.getElementById("airTemp")
-.textContent="Loading...";
 
-document.getElementById("wind")
-.textContent="Loading...";
+document
+.getElementById("airTemp")
+.textContent=
+"Loading...";
 
-document.getElementById("pressure")
-.textContent="Loading...";
 
-document.getElementById("rating")
-.textContent="Loading...";
+document
+.getElementById("wind")
+.textContent=
+"Loading...";
+
+
+document
+.getElementById("pressure")
+.textContent=
+"Loading...";
+
+
+document
+.getElementById("rating")
+.textContent=
+"Loading...";
 
 
 const url=
@@ -929,7 +1041,8 @@ const url=
 
 fetch(url)
 
-.then(function(response){
+.then(
+function(response){
 
 if(!response.ok){
 
@@ -942,35 +1055,53 @@ response.status
 
 return response.json();
 
-})
+}
+)
 
-.then(function(data){
+.then(
+function(data){
 
-const c=data.current;
+const current=
+data.current;
 
-const temp=
-Number(c.temperature_2m);
+
+const temperature=
+Number(
+current.temperature_2m
+);
+
 
 const speed=
-Number(c.wind_speed_10m);
+Number(
+current.wind_speed_10m
+);
+
 
 const direction=
-Number(c.wind_direction_10m);
+Number(
+current.wind_direction_10m
+);
+
 
 const pressure=
-Number(c.surface_pressure);
+Number(
+current.surface_pressure
+);
 
 
 currentWindDirection=
 direction;
 
 
-document.getElementById("airTemp")
+document
+.getElementById("airTemp")
 .textContent=
-temp.toFixed(1)+"°F";
+temperature.toFixed(1)+
+"°F";
 
 
-document.getElementById("wind")
+document
+.getElementById("wind")
 .textContent=
 compass(direction)+
 " "+
@@ -978,10 +1109,12 @@ speed.toFixed(1)+
 " MPH";
 
 
-document.getElementById("pressure")
+document
+.getElementById("pressure")
 .textContent=
 (
-pressure*0.0295299833
+pressure*
+0.0295299833
 ).toFixed(2)+
 " inHg";
 
@@ -1010,8 +1143,8 @@ score+=2;
 
 
 if(
-temp>=75 &&
-temp<=90
+temperature>=75 &&
+temperature<=90
 ){
 
 score+=1;
@@ -1039,7 +1172,8 @@ rating="GOOD";
 }
 
 
-document.getElementById("rating")
+document
+.getElementById("rating")
 .textContent=
 rating;
 
@@ -1050,475 +1184,195 @@ drawWind();
 
 }
 
-})
+}
+)
 
-.catch(function(error){
+.catch(
+function(error){
 
 console.log(
 "Weather error:",
 error
 );
 
-document.getElementById("airTemp")
-.textContent="Unavailable";
 
-document.getElementById("wind")
-.textContent="Unavailable";
+document
+.getElementById("airTemp")
+.textContent=
+"Unavailable";
 
-document.getElementById("pressure")
-.textContent="Unavailable";
 
-document.getElementById("rating")
-.textContent="Unavailable";
+document
+.getElementById("wind")
+.textContent=
+"Unavailable";
 
-});
+
+document
+.getElementById("pressure")
+.textContent=
+"Unavailable";
+
+
+document
+.getElementById("rating")
+.textContent=
+"Unavailable";
+
+}
+);
 
 }
 
 
 /* =====================================================
-   WIND
+   FWC FISH ATTRACTORS
 ===================================================== */
 
-function drawWind(){
+async function loadAttractors(){
 
-windLayer.clearLayers();
+attractorLayer.clearLayers();
 
-if(!windOn){
-
-return;
-
-}
 
 const bounds=
 map.getBounds();
 
-const north=
-bounds.getNorth();
 
-const south=
-bounds.getSouth();
-
-const east=
-bounds.getEast();
-
-const west=
+const xmin=
 bounds.getWest();
 
+const xmax=
+bounds.getEast();
 
-const arrowDirection=
-(currentWindDirection+180)%360;
+const ymin=
+bounds.getSouth();
 
-
-for(let row=0;row<6;row++){
-
-for(let col=0;col<7;col++){
-
-const lat=
-south+
-(north-south)*
-(row+.5)/6;
-
-const lon=
-west+
-(east-west)*
-(col+.5)/7;
+const ymax=
+bounds.getNorth();
 
 
-const icon=
-L.divIcon({
-
-className:"",
-
-html:
-
-"<div style='"+
-"font-size:24px;"+
-"font-weight:bold;"+
-"color:#ff8c00;"+
-"text-shadow:1px 1px 2px #000;"+
-"transform:rotate("+
-arrowDirection+
-"deg)'>➜</div>",
-
-iconSize:[30,30],
-
-iconAnchor:[15,15]
-
-});
+const geometry=
+xmin+
+","+
+ymin+
+","+
+xmax+
+","+
+ymax;
 
 
-L.marker(
+const url=
+
+FWC_ATTRACTOR_URL+
+"/11/query"+
+"?geometry="+
+encodeURIComponent(geometry)+
+"&geometryType=esriGeometryEnvelope"+
+"&inSR=4326"+
+"&spatialRel=esriSpatialRelIntersects"+
+"&outFields="+
+encodeURIComponent(
+"WATERBODY,NAME,MATERIAL,LATITUDE,LONGITUDE,COUNTY"
+)+
+"&returnGeometry=true"+
+"&outSR=4326"+
+"&f=geojson";
+
+
+try{
+
+const response=
+await fetch(url);
+
+
+if(!response.ok){
+
+throw new Error(
+"FWC attractor HTTP "+
+response.status
+);
+
+}
+
+
+const data=
+await response.json();
+
+
+if(
+!data.features
+){
+
+return 0;
+
+}
+
+
+data.features.forEach(
+function(feature){
+
+const p=
+feature.properties;
+
+
+let lat=null;
+
+let lon=null;
+
+
+if(
+feature.geometry &&
+feature.geometry.coordinates
+){
+
+lon=
+Number(
+feature.geometry.coordinates[0]
+);
+
+lat=
+Number(
+feature.geometry.coordinates[1]
+);
+
+}
+
+
+if(
+!Number.isFinite(lat) ||
+!Number.isFinite(lon)
+){
+
+lat=
+Number(
+p.LATITUDE
+);
+
+lon=
+Number(
+p.LONGITUDE
+);
+
+}
+
+
+if(
+!Number.isFinite(lat) ||
+!Number.isFinite(lon)
+){
+
+return;
+
+}
+
+
+const marker=
+L.circleMarker(
 [lat,lon],
 {
-icon:icon,
-interactive:false
-}
-).addTo(windLayer);
 
-}
+radius:8,
 
-}
+color:"#570078",
 
-}
-
-
-/* =====================================================
-   WIND BUTTON
-===================================================== */
-
-document
-.getElementById("windButton")
-.addEventListener("click",function(){
-
-windOn=!windOn;
-
-activeButton(
-"windButton",
-windOn
-);
-
-if(windOn){
-
-windLayer.addTo(map);
-
-drawWind();
-
-status(
-"Wind direction arrows turned ON."
-);
-
-}
-else{
-
-map.removeLayer(windLayer);
-
-status(
-"Wind direction arrows turned OFF."
-);
-
-}
-
-});
-
-
-/* =====================================================
-   BASS PREDICTION
-===================================================== */
-
-function createBassAreas(){
-
-bassLayer.clearLayers();
-
-
-const lakeName=
-document.getElementById("lake").value;
-
-const lake=
-lakes[lakeName];
-
-
-if(!lake){
-
-return;
-
-}
-
-
-/*
-   These are prediction zones,
-   not claims that fish are actually
-   sitting on these exact points.
-*/
-
-
-const patterns=[
-
-{
-lat:0.025,
-lon:-0.018,
-color:"#0066ff",
-label:"High Trophy Potential",
-radius:180
-},
-
-{
-lat:-0.018,
-lon:0.030,
-color:"#00b83d",
-label:"High Bass Potential",
-radius:150
-},
-
-{
-lat:0.008,
-lon:0.040,
-color:"#ffd000",
-label:"Possible Bass Area",
-radius:130
-},
-
-{
-lat:-0.035,
-lon:-0.010,
-color:"#00b83d",
-label:"High Bass Potential",
-radius:140
-},
-
-{
-lat:0.040,
-lon:0.025,
-color:"#0066ff",
-label:"High Trophy Potential",
-radius:170
-}
-
-];
-
-
-patterns.forEach(function(p){
-
-const circle=
-L.circle(
-
-[
-lake.lat+p.lat,
-lake.lon+p.lon
-],
-
-{
-
-radius:p.radius,
-
-color:p.color,
-
-weight:2,
-
-fillColor:p.color,
-
-fillOpacity:.30
-
-}
-
-);
-
-
-circle.bindPopup(
-
-"<div class='bassPopup'>"+
-"<strong>🎯 "+
-p.label+
-"</strong>"+
-"<br><br>"+
-"This is a predicted high-potential "+
-"area based on environmental and "+
-"structural factors."+
-"<br><br>"+
-"Not a guaranteed fish location."+
-"</div>"
-
-);
-
-
-bassLayer.addLayer(circle);
-
-});
-
-}
-
-
-/* =====================================================
-   BASS BUTTON
-===================================================== */
-
-document
-.getElementById("bassButton")
-.addEventListener("click",function(){
-
-bassOn=!bassOn;
-
-activeButton(
-"bassButton",
-bassOn
-);
-
-if(bassOn){
-
-createBassAreas();
-
-bassLayer.addTo(map);
-
-status(
-"Predicted bass areas turned ON."
-);
-
-}
-else{
-
-map.removeLayer(bassLayer);
-
-status(
-"Predicted bass areas turned OFF."
-);
-
-}
-
-});
-
-
-/* =====================================================
-   STATUS
-===================================================== */
-
-function status(text){
-
-document.getElementById("mapStatus")
-.textContent=text;
-
-}
-
-
-/* =====================================================
-   LAKE SELECTION
-===================================================== */
-
-async function selectLake(){
-
-const lakeName=
-document.getElementById("lake").value;
-
-const lake=
-lakes[lakeName];
-
-
-if(!lake){
-
-return;
-
-}
-
-
-document.getElementById("lakeName")
-.textContent=
-lakeName;
-
-
-map.setView(
-[lake.lat,lake.lon],
-lake.zoom
-);
-
-
-status(
-"Loading "+
-lakeName+
-"..."
-);
-
-
-loadWeather();
-
-
-if(bassOn){
-
-createBassAreas();
-
-}
-
-
-if(windOn){
-
-drawWind();
-
-}
-
-
-setTimeout(function(){
-
-map.invalidateSize();
-
-},500);
-
-
-status(
-lakeName+
-" loaded. Select the map tools above."
-);
-
-}
-
-
-/* =====================================================
-   MAP MOVEMENT
-===================================================== */
-
-map.on(
-"moveend",
-function(){
-
-if(windOn){
-
-drawWind();
-
-}
-
-});
-
-
-/* =====================================================
-   EVENTS
-===================================================== */
-
-document
-.getElementById("lake")
-.addEventListener(
-"change",
-selectLake
-);
-
-
-document
-.getElementById("refreshWeather")
-.addEventListener(
-"click",
-loadWeather
-);
-
-
-/* =====================================================
-   START
-===================================================== */
-
-const initial=
-lakes[
-document.getElementById("lake").value
-];
-
-
-map.setView(
-[initial.lat,initial.lon],
-initial.zoom
-);
-
-
-loadWeather();
-
-
-if(bassOn){
-
-createBassAreas();
-
-}
-
-
-setTimeout(function(){
-
-map.invalidateSize();
-
-},1000);
-
-</script>
-
-</body>
-</html>
+weight
