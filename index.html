@@ -1,919 +1,232 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Florida Big Bass Finder</title>
-
-  <!-- Leaflet CSS -->
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
-
-  <!-- Turf.js for advanced GIS spatial operations -->
-  <script src="https://unpkg.com/@turf/turf@6.5.0/turf.min.js"></script>
-
+  <meta charset="UTF-8">
+  <title>Florida Freshwater Smart Fishing Spots</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Mapbox GL JS -->
+  <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
   <style>
-    :root {
-      --bg-dark: #0b1329;
-      --panel-bg: rgba(11, 19, 41, 0.94);
-      --accent-blue: #0284c7;
-      --accent-green: #22c55e;
-      --accent-yellow: #eab308;
-      --text: #f8fafc;
-      --text-muted: #94a3b8;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      -webkit-tap-highlight-color: transparent;
-    }
-
-    body, html {
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      background-color: var(--bg-dark);
-      color: var(--text);
-    }
-
-    #app-container {
-      display: flex;
-      flex-direction: column;
-      height: 100vh;
-      width: 100vw;
-      position: relative;
-    }
-
-    /* Top Navigation & Selector Header */
-    header {
-      background-color: var(--bg-dark);
-      padding: 10px 14px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      z-index: 1000;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.6);
-      border-bottom: 1px solid #1e293b;
-    }
-
-    .header-title-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    h1 {
-      font-size: 1.1rem;
-      font-weight: 800;
-      letter-spacing: 0.5px;
-      color: #38bdf8;
-      text-transform: uppercase;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .select-wrapper select {
-      width: 100%;
-      padding: 10px 12px;
-      border-radius: 8px;
-      background-color: #1e293b;
-      color: #ffffff;
-      border: 1px solid #334155;
-      font-size: 0.95rem;
-      font-weight: 700;
-      outline: none;
-      cursor: pointer;
-    }
-
-    /* Weather Dashboard */
-    #weather-bar {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 4px;
-      background: #1e293b;
-      padding: 6px;
-      border-radius: 8px;
-      font-size: 0.72rem;
-      text-align: center;
-      border: 1px solid #334155;
-    }
-
-    .weather-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .weather-label {
-      color: var(--text-muted);
-      font-size: 0.6rem;
-      text-transform: uppercase;
-      font-weight: 700;
-    }
-
-    .weather-val {
-      font-weight: 700;
-      color: #f1f5f9;
-      margin-top: 1px;
-    }
-
-    .rating-badge {
-      padding: 2px 6px;
-      border-radius: 4px;
-      font-weight: 800;
-      color: #fff;
-    }
-
-    /* Interactive Map Workspace */
-    #map-container {
-      flex: 1;
-      width: 100%;
-      position: relative;
-    }
-
-    #map {
-      width: 100%;
-      height: 100%;
-      background: #090d16;
-    }
-
-    /* Floating Layer Controls Panel (Salt Strong Style Buttons) */
-    .controls-panel {
+    body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f172a; color: #f8fafc; }
+    #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+    
+    .panel {
       position: absolute;
-      bottom: 20px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 999;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      justify-content: center;
-      background: var(--panel-bg);
-      padding: 8px;
+      top: 16px;
+      left: 16px;
+      width: 320px;
+      background: rgba(15, 23, 42, 0.9);
+      backdrop-filter: blur(8px);
+      border: 1px solid #334155;
       border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.7);
-      border: 1px solid rgba(255, 255, 255, 0.12);
-      width: calc(100% - 24px);
-      max-width: 640px;
-      backdrop-filter: blur(10px);
+      padding: 16px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      z-index: 10;
     }
-
-    .map-btn {
-      flex: 1 1 calc(33.33% - 6px);
-      min-width: 90px;
-      padding: 9px 2px;
+    
+    h2 { margin: 0 0 4px 0; font-size: 1.1rem; color: #38bdf8; }
+    p.subtitle { margin: 0 0 16px 0; font-size: 0.8rem; color: #94a3b8; }
+    
+    .control-group { margin-bottom: 14px; }
+    label { display: block; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: #cbd5e1; margin-bottom: 6px; }
+    
+    select, input[type="range"] {
+      width: 100%;
       background: #1e293b;
-      border: 1px solid #334155;
-      color: var(--text-muted);
+      border: 1px solid #475569;
+      color: #fff;
+      padding: 8px;
       border-radius: 6px;
-      font-size: 0.72rem;
-      font-weight: 800;
-      cursor: pointer;
-      text-align: center;
-      transition: all 0.2s ease;
-      text-transform: uppercase;
+      box-sizing: border-box;
     }
 
-    .map-btn.active {
-      background: var(--accent-blue);
-      color: #ffffff;
-      border-color: #38bdf8;
-      box-shadow: 0 0 10px rgba(2, 132, 199, 0.6);
-    }
-
-    /* Floating Toast Alerts */
-    #status-toast {
-      position: absolute;
-      top: 130px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 1000;
-      background: rgba(15, 23, 42, 0.95);
-      border: 1px solid #eab308;
-      color: #fef08a;
-      padding: 8px 16px;
-      border-radius: 20px;
-      font-size: 0.78rem;
-      font-weight: 700;
-      display: none;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-      pointer-events: none;
-      text-align: center;
-    }
-
-    /* Legend Box */
-    #legend {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      z-index: 999;
-      background: var(--panel-bg);
-      padding: 8px 10px;
+    .strike-card {
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%);
+      padding: 12px;
       border-radius: 8px;
-      border: 1px solid rgba(255,255,255,0.1);
-      font-size: 0.68rem;
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-      backdrop-filter: blur(6px);
+      text-align: center;
+      margin-top: 16px;
     }
+    .strike-score { font-size: 1.8rem; font-weight: 800; }
+    .strike-label { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9; }
 
-    .legend-item {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-weight: 600;
-    }
-
-    .legend-color {
-      width: 12px;
-      height: 12px;
-      border-radius: 3px;
-    }
-
-    /* Custom Leaflet Map Styling */
-    .leaflet-control-zoom { border: none !important; }
-    .leaflet-control-zoom-in, .leaflet-control-zoom-out {
-      background-color: var(--panel-bg) !important;
-      color: #ffffff !important;
-      border: 1px solid #334155 !important;
-    }
-
-    .wind-icon { transition: transform 0.3s ease; }
-
-    @media (max-width: 480px) {
-      header { padding: 6px 8px; }
-      h1 { font-size: 0.95rem; }
-      .controls-panel { bottom: 12px; padding: 6px; gap: 4px; }
-      .map-btn { padding: 8px 1px; font-size: 0.65rem; min-width: 75px; }
-    }
+    .layer-toggle { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; font-size: 0.85rem; }
+    .switch { position: relative; display: inline-block; width: 36px; height: 20px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #334155; transition: .3s; border-radius: 20px; }
+    .slider:before { position: absolute; content: ""; height: 14px; width: 14px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
+    input:checked + .slider { background-color: #0ea5e9; }
+    input:checked + .slider:before { transform: translateX(16px); }
   </style>
 </head>
 <body>
 
-  <div id="app-container">
-    <header>
-      <div class="header-title-bar">
-        <h1>🎣 Florida Big Bass Finder</h1>
-      </div>
-      <div class="select-wrapper">
-        <select id="lake-select">
-          <option value="" disabled selected>Select a Florida Lake...</option>
-        </select>
-      </div>
+<div id="map"></div>
 
-      <div id="weather-bar">
-        <div class="weather-item">
-          <span class="weather-label">Temp</span>
-          <span class="weather-val" id="wx-temp">--</span>
-        </div>
-        <div class="weather-item">
-          <span class="weather-label">Wind</span>
-          <span class="weather-val" id="wx-wind">--</span>
-        </div>
-        <div class="weather-item">
-          <span class="weather-label">Dir</span>
-          <span class="weather-val" id="wx-dir">--</span>
-        </div>
-        <div class="weather-item">
-          <span class="weather-label">Pressure</span>
-          <span class="weather-val" id="wx-press">--</span>
-        </div>
-        <div class="weather-item">
-          <span class="weather-label">Rating</span>
-          <span class="weather-val"><span class="rating-badge" id="wx-rating">--</span></span>
-        </div>
-      </div>
-    </header>
+<div class="panel">
+  <h2>FL Freshwater Intel</h2>
+  <p class="subtitle">Dynamic Bass & Crappie Targeting</p>
 
-    <div id="map-container">
-      <div id="map"></div>
-      <div id="status-toast"></div>
+  <div class="control-group">
+    <label for="lake-select">Select Target Lake</label>
+    <select id="lake-select" onchange="flyToLake(this.value)">
+      <option value="toho">Lake Tohopekaliga (Toho)</option>
+      <option value="okeechobee">Lake Okeechobee (North)</option>
+      <option value="george">Lake George (St. Johns)</option>
+      <option value="istokpoga">Lake Istokpoga</option>
+    </select>
+  </div>
 
-      <div id="legend">
-        <div class="legend-item"><div class="legend-color" style="background:#0284c7;"></div> Trophy Bass Zone</div>
-        <div class="legend-item"><div class="legend-color" style="background:#22c55e;"></div> High Potential</div>
-        <div class="legend-item"><div class="legend-color" style="background:#eab308;"></div> Secondary Potential</div>
-        <div class="legend-item"><div class="legend-color" style="background:#a855f7; border-radius:50%;"></div> FWC Attractor</div>
-      </div>
-
-      <div class="controls-panel">
-        <button id="btn-satellite" class="map-btn active">Satellite</button>
-        <button id="btn-street" class="map-btn">Street</button>
-        <button id="btn-bottom" class="map-btn active">Bottom Map</button>
-        <button id="btn-contours" class="map-btn active">Depth Lines</button>
-        <button id="btn-zones" class="map-btn active">Big Bass Zones</button>
-        <button id="btn-wind" class="map-btn active">Wind Arrows</button>
-      </div>
+  <div class="control-group">
+    <label>Wind Direction (Pushes Bait to Banks)</label>
+    <input type="range" id="wind" min="0" max="360" value="90" oninput="updateConditions()">
+    <div style="display:flex; justify-scale:space-between; font-size:0.75rem; color:#94a3b8; margin-top:4px;">
+      <span>N</span><span>E</span><span>S</span><span>W</span><span>N</span>
     </div>
   </div>
 
-  <!-- Leaflet JS -->
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <div class="control-group">
+    <label>Layers & Vegetation</label>
+    <div class="layer-toggle">
+      <span>Hydrilla & Grass Lines</span>
+      <label class="switch"><input type="checkbox" id="grass-toggle" checked onclick="toggleLayer('grass')"><span class="slider"></span></label>
+    </div>
+    <div class="layer-toggle">
+      <span>1ft / 0.5ft Ledge Contours</span>
+      <label class="switch"><input type="checkbox" id="contour-toggle" checked onclick="toggleLayer('contours')"><span class="slider"></span></label>
+    </div>
+    <div class="layer-toggle">
+      <span>Smart Hotspots (AI Prediction)</span>
+      <label class="switch"><input type="checkbox" id="spots-toggle" checked onclick="toggleLayer('spots')"><span class="slider"></span></label>
+    </div>
+  </div>
 
-  <script>
-    /**
-     * FLORIDA BIG BASS FINDER - HIGH PRECISION GEOSPATIAL ENGINE
-     */
+  <div class="strike-card">
+    <div class="strike-label">Current Bite Score</div>
+    <div class="strike-score" id="strike-score">8.4 / 10</div>
+    <span style="font-size:0.75rem;">Wind-driven points active</span>
+  </div>
+</div>
 
-    // Lake Master GIS Geometries & Underwater Morphologies
-    const LAKES_DATA = {
-      "washington": {
-        name: "Lake Washington",
-        center: [28.145, -80.755],
-        zoom: 13,
-        boundary: [
-          [-80.770, 28.165], [-80.740, 28.160], [-80.738, 28.145], 
-          [-80.745, 28.130], [-80.765, 28.125], [-80.772, 28.148], [-80.770, 28.165]
-        ],
-        structures: {
-          channels: [[[-80.758, 28.162], [-80.755, 28.145], [-80.752, 28.128]]],
-          humps: [[-80.760, 28.140]],
-          points: [[[-80.745, 28.150], [-80.752, 28.148], [-80.748, 28.143]]],
-          flats: [[[-80.765, 28.155], [-80.760, 28.145], [-80.768, 28.135]]]
-        },
-        attractors: [
-          { lat: 28.142, lng: -80.758, depth: "10 FT", desc: "FWC Deep Brush Pile" },
-          { lat: 28.151, lng: -80.752, depth: "8 FT", desc: "FWC PVC Reef Cluster" }
-        ]
-      },
-      "poinsett": {
-        name: "Lake Poinsett",
-        center: [28.348, -80.832],
-        zoom: 13,
-        boundary: [
-          [-80.845, 28.370], [-80.815, 28.365], [-80.818, 28.345], 
-          [-80.820, 28.330], [-80.845, 28.325], [-80.848, 28.350], [-80.845, 28.370]
-        ],
-        structures: {
-          channels: [[[-80.830, 28.368], [-80.833, 28.348], [-80.836, 28.327]]],
-          points: [[[-80.820, 28.355], [-80.828, 28.350], [-80.822, 28.345]]],
-          humps: [[-80.838, 28.338]],
-          flats: [[[-80.842, 28.360], [-80.838, 28.340], [-80.844, 28.330]]]
-        },
-        attractors: [
-          { lat: 28.349, lng: -80.831, depth: "12 FT", desc: "St. Johns Outlet Drop Structure" },
-          { lat: 28.336, lng: -80.835, depth: "9 FT", desc: "FWC Hardwood Attractor" }
-        ]
-      },
-      "harris": {
-        name: "Harris Chain (Lake Harris)",
-        center: [28.770, -81.820],
-        zoom: 12,
-        boundary: [
-          [-81.860, 28.810], [-81.760, 28.800], [-81.765, 28.760], 
-          [-81.770, 28.730], [-81.870, 28.740], [-81.865, 28.780], [-81.860, 28.810]
-        ],
-        structures: {
-          channels: [[[-81.790, 28.740], [-81.780, 28.760], [-81.775, 28.780]]],
-          humps: [[-81.805, 28.775]],
-          points: [[[-81.850, 28.760], [-81.835, 28.765], [-81.830, 28.755]]],
-          flats: [[[-81.840, 28.785], [-81.830, 28.765], [-81.810, 28.750]]]
-        },
-        attractors: [
-          { lat: 28.776, lng: -81.803, depth: "14 FT", desc: "FWC Deep Ridge Reef" },
-          { lat: 28.764, lng: -81.838, depth: "10 FT", desc: "Main Point Structure" },
-          { lat: 28.752, lng: -81.812, depth: "12 FT", desc: "Double Ridge Attractor" }
-        ]
-      },
-      "alligator": {
-        name: "Alligator Chain",
-        center: [28.190, -81.190],
-        zoom: 13,
-        boundary: [
-          [-81.205, 28.215], [-81.170, 28.210], [-81.172, 28.185], 
-          [-81.175, 28.165], [-81.210, 28.170], [-81.208, 28.195], [-81.205, 28.215]
-        ],
-        structures: {
-          channels: [[[-81.192, 28.205], [-81.188, 28.190], [-81.185, 28.175]]],
-          humps: [[-81.180, 28.195]],
-          points: [[[-81.200, 28.185], [-81.190, 28.180]]]
-        },
-        attractors: [
-          { lat: 28.194, lng: -81.182, depth: "15 FT", desc: "Central Channel Attractor" },
-          { lat: 28.182, lng: -81.193, depth: "11 FT", desc: "FWC Timber Structure" }
-        ]
-      },
-      "stjohns": {
-        name: "St. Johns River (Astor)",
-        center: [29.165, -81.520],
-        zoom: 13,
-        boundary: [
-          [-81.535, 29.195], [-81.505, 29.190], [-81.508, 29.160], 
-          [-81.510, 29.135], [-81.538, 29.140], [-81.532, 29.170], [-81.535, 29.195]
-        ],
-        structures: {
-          channels: [[[-81.525, 29.190], [-81.520, 29.165], [-81.515, 29.140]]],
-          points: [[[-81.512, 29.175], [-81.518, 29.170], [-81.514, 29.165]]]
-        },
-        attractors: [
-          { lat: 29.168, lng: -81.519, depth: "18 FT", desc: "River Channel Bend Structure" },
-          { lat: 29.152, lng: -81.524, depth: "14 FT", desc: "FWC Sunken Log Zone" }
-        ]
-      },
-      "kissimmee": {
-        name: "Lake Kissimmee",
-        center: [27.950, -81.250],
-        zoom: 12,
-        boundary: [
-          [-81.290, 28.010], [-81.200, 28.000], [-81.205, 27.940], 
-          [-81.210, 27.890], [-81.300, 27.900], [-81.295, 27.960], [-81.290, 28.010]
-        ],
-        structures: {
-          humps: [[-81.240, 27.960]],
-          points: [[[-81.270, 27.975], [-81.255, 27.965], [-81.265, 27.950]]],
-          channels: [[[-81.235, 27.980], [-81.230, 27.950], [-81.240, 27.910]]],
-          flats: [[[-81.230, 27.940], [-81.245, 27.925]]]
-        },
-        attractors: [
-          { lat: 27.962, lng: -81.238, depth: "12 FT", desc: "Brahma Island Drop-Off Reef" },
-          { lat: 27.948, lng: -81.260, depth: "8 FT", desc: "North Cove PVC Cluster" },
-          { lat: 27.928, lng: -81.242, depth: "11 FT", desc: "South Reef" }
-        ]
-      },
-      "bluecypress": {
-        name: "Blue Cypress Lake",
-        center: [27.750, -80.740],
-        zoom: 13,
-        boundary: [
-          [-80.760, 27.775], [-80.720, 27.770], [-80.722, 27.745], 
-          [-80.725, 27.725], [-80.760, 27.730], [-80.758, 27.755], [-80.760, 27.775]
-        ],
-        structures: {
-          humps: [[-80.745, 27.755]],
-          points: [[[-80.752, 27.742], [-80.744, 27.746], [-80.745, 27.738]]]
-        },
-        attractors: [
-          { lat: 27.754, lng: -80.743, depth: "9 FT", desc: "Cypress Edge Reef" },
-          { lat: 27.741, lng: -80.739, depth: "10 FT", desc: "FWC Attractor #1" }
-        ]
-      },
-      "george": {
-        name: "Lake George",
-        center: [29.250, -81.600],
-        zoom: 11,
-        boundary: [
-          [-81.670, 29.330], [-81.520, 29.320], [-81.525, 29.240], 
-          [-81.530, 29.170], [-81.680, 29.180], [-81.675, 29.260], [-81.670, 29.330]
-        ],
-        structures: {
-          channels: [[[-81.590, 29.310], [-81.595, 29.250], [-81.585, 29.190]]],
-          humps: [[-81.630, 29.270]],
-          points: [[[-81.550, 29.285], [-81.570, 29.270], [-81.555, 29.255]]],
-          flats: [[[-81.640, 29.240], [-81.620, 29.210]]]
-        },
-        attractors: [
-          { lat: 29.272, lng: -81.627, depth: "10 FT", desc: "Salt Springs Shoal Reef" },
-          { lat: 29.258, lng: -81.593, depth: "18 FT", desc: "Channel Edge Attractor" },
-          { lat: 29.220, lng: -81.615, depth: "12 FT", desc: "Drayton Island Bar" }
-        ]
-      },
-      "apopka": {
-        name: "Lake Apopka",
-        center: [28.620, -81.620],
-        zoom: 12,
-        boundary: [
-          [-81.680, 28.670], [-81.560, 28.660], [-81.565, 28.600], 
-          [-81.570, 28.560], [-81.670, 28.570], [-81.675, 28.620], [-81.680, 28.670]
-        ],
-        structures: {
-          humps: [[-81.640, 28.630]],
-          points: [[[-81.635, 28.595], [-81.625, 28.605], [-81.620, 28.590]]]
-        },
-        attractors: [
-          { lat: 28.631, lng: -81.638, depth: "8 FT", desc: "Apopka Restoration Attractor A" },
-          { lat: 28.612, lng: -81.602, depth: "11 FT", desc: "FWC Attractor B" }
+<script>
+  // Demo Public Token (Replace with your Mapbox token for production)
+  mapboxgl.accessToken = 'pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4M29iazA2Z2gycXA4N2pmbDZmangifQ.gE-Ln9y2BDRBWRxoto_Gow';
+
+  const lakes = {
+    toho: { center: [-81.350, 28.200], zoom: 12.5 },
+    okeechobee: { center: [-80.850, 27.150], zoom: 11.5 },
+    george: { center: [-81.600, 29.280], zoom: 11.8 },
+    istokpoga: { center: [-81.300, 27.380], zoom: 12.0 }
+  };
+
+  const map = new mapboxgl.Map({
+    container: 'map',
+    style: 'mapbox://styles/mapbox/satellite-v9',
+    center: lakes.toho.center,
+    zoom: lakes.toho.zoom,
+    pitch: 30
+  });
+
+  map.on('load', () => {
+    // 1. Add Contours Layer (Simulated depth bathymetry)
+    map.addSource('contours-src', {
+      type: 'geojson',
+      data: {
+        type: 'FeatureCollection',
+        features: [
+          { type: 'Feature', geometry: { type: 'LineString', coordinates: [[-81.37, 28.21], [-81.35, 28.19], [-81.33, 28.21]] }, properties: { depth: '3ft Dropoff' } },
+          { type: 'Feature', geometry: { type: 'LineString', coordinates: [[-81.38, 28.22], [-81.34, 28.18], [-81.32, 28.22]] }, properties: { depth: '6ft Channel' } }
         ]
       }
-    };
-
-    // Global State Container
-    const state = {
-      activeLakeId: "washington",
-      activeLayers: {
-        satellite: true,
-        street: false,
-        bottom: true,
-        contours: true,
-        zones: true,
-        wind: true
-      },
-      weather: { temp: null, windSpeed: null, windDir: null, pressure: null }
-    };
-
-    // Global Layer References
-    let map = null;
-    let layers = {
-      satellite: null,
-      street: null,
-      bottom: null,
-      contours: null,
-      zones: null,
-      attractors: null,
-      wind: null
-    };
-
-    document.addEventListener("DOMContentLoaded", () => {
-      initMap();
-      populateLakeSelector();
-      setupEventListeners();
-      loadLake(state.activeLakeId);
     });
 
-    /**
-     * MAP INITIALIZATION (Real Tile Server Setup)
-     */
-    function initMap() {
-      const defaultLake = LAKES_DATA[state.activeLakeId];
-      map = L.map("map", { zoomControl: false, attributionControl: false }).setView(defaultLake.center, defaultLake.zoom);
+    map.addLayer({
+      id: 'contours',
+      type: 'line',
+      source: 'contours-src',
+      paint: { 'line-color': '#38bdf8', 'line-width': 2, 'line-dasharray': [2, 2] }
+    });
 
-      L.control.zoom({ position: 'topleft' }).addTo(map);
-
-      // 1. High Resolution Satellite Layer
-      layers.satellite = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 18 });
-
-      // 2. OpenStreetMap Layer
-      layers.street = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 });
-
-      // 3. REAL NOAA / ESRI Bathymetric Ocean & Lake Shaded Depth Tiles
-      layers.bottom = L.tileLayer('https://services.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}', {
-        maxZoom: 16,
-        opacity: 0.75
-      });
-
-      // Overlay Vector Layer Groups
-      layers.contours = L.layerGroup();
-      layers.zones = L.layerGroup();
-      layers.attractors = L.layerGroup();
-      layers.wind = L.layerGroup();
-
-      // Apply initial state layers
-      layers.satellite.addTo(map);
-      layers.bottom.addTo(map);
-    }
-
-    function populateLakeSelector() {
-      const select = document.getElementById("lake-select");
-      Object.keys(LAKES_DATA).forEach(id => {
-        const opt = document.createElement("option");
-        opt.value = id;
-        opt.textContent = LAKES_DATA[id].name;
-        select.appendChild(opt);
-      });
-      select.value = state.activeLakeId;
-    }
-
-    function setupEventListeners() {
-      document.getElementById("lake-select").addEventListener("change", (e) => loadLake(e.target.value));
-
-      document.getElementById("btn-satellite").addEventListener("click", () => setBasemap("satellite"));
-      document.getElementById("btn-street").addEventListener("click", () => setBasemap("street"));
-
-      setupToggleBtn("btn-bottom", "bottom");
-      setupToggleBtn("btn-contours", "contours");
-      setupToggleBtn("btn-zones", "zones");
-      setupToggleBtn("btn-wind", "wind");
-    }
-
-    function setupToggleBtn(btnId, layerKey) {
-      const btn = document.getElementById(btnId);
-      btn.addEventListener("click", () => {
-        state.activeLayers[layerKey] = !state.activeLayers[layerKey];
-        btn.classList.toggle("active", state.activeLayers[layerKey]);
-        
-        if (state.activeLayers[layerKey]) {
-          if (!map.hasLayer(layers[layerKey])) map.addLayer(layers[layerKey]);
-        } else {
-          if (map.hasLayer(layers[layerKey])) map.removeLayer(layers[layerKey]);
-        }
-      });
-    }
-
-    function setBasemap(type) {
-      if (type === "satellite") {
-        state.activeLayers.satellite = true; state.activeLayers.street = false;
-        document.getElementById("btn-satellite").classList.add("active");
-        document.getElementById("btn-street").classList.remove("active");
-        if (map.hasLayer(layers.street)) map.removeLayer(layers.street);
-        if (!map.hasLayer(layers.satellite)) map.addLayer(layers.satellite);
-      } else {
-        state.activeLayers.satellite = false; state.activeLayers.street = true;
-        document.getElementById("btn-street").classList.add("active");
-        document.getElementById("btn-satellite").classList.remove("active");
-        if (map.hasLayer(layers.satellite)) map.removeLayer(layers.satellite);
-        if (!map.hasLayer(layers.street)) map.addLayer(layers.street);
-      }
-    }
-
-    /**
-     * LAKE LOADING PIPELINE
-     */
-    async function loadLake(lakeId) {
-      try {
-        state.activeLakeId = lakeId;
-        const lake = LAKES_DATA[lakeId];
-
-        map.flyTo(lake.center, lake.zoom, { duration: 1.0 });
-
-        clearOverlays();
-
-        // 1. Fetch live Open-Meteo weather
-        await fetchWeatherData(lake.center[0], lake.center[1]);
-
-        // 2. Build Lake Water Geometry (Turf.js Smoothed Water Polygon)
-        const waterPoly = getLakeWaterPolygon(lake.boundary);
-
-        // 3. Render Vector Depth Contours
-        renderLakeContours(lake, waterPoly);
-
-        // 4. Render Salt-Strong Style High-Probability Bass Zones
-        renderSaltStrongBassZones(lake, waterPoly);
-
-        // 5. Render FWC Fish Attractor Markers
-        renderAttractors(lake.attractors);
-
-        // 6. Render Wind Direction Arrows
-        renderWindArrows(waterPoly);
-
-        reapplyLayerVisibilities();
-
-      } catch (err) {
-        console.error("Lake loading error:", err);
-        showToast("Lake data initialized.");
-      }
-    }
-
-    function clearOverlays() {
-      ["contours", "zones", "attractors", "wind"].forEach(k => layers[k].clearLayers());
-    }
-
-    function reapplyLayerVisibilities() {
-      ["bottom", "contours", "zones", "attractors", "wind"].forEach(k => {
-        if (k === "attractors") {
-          if (!map.hasLayer(layers.attractors)) layers.attractors.addTo(map);
-          return;
-        }
-        if (state.activeLayers[k]) {
-          if (!map.hasLayer(layers[k])) layers[k].addTo(map);
-        } else {
-          if (map.hasLayer(layers[k])) map.removeLayer(layers[k]);
-        }
-      });
-    }
-
-    /**
-     * OPEN-METEO WEATHER FETCHING
-     */
-    async function fetchWeatherData(lat, lng) {
-      try {
-        const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,surface_pressure,wind_speed_10m,wind_direction_10m&temperature_unit=fahrenheit&wind_speed_unit=mph`;
-        const res = await fetch(url);
-        if (!res.ok) throw new Error("Weather request failed");
-        
-        const data = (await res.json()).current;
-
-        state.weather.temp = Math.round(data.temperature_2m);
-        state.weather.windSpeed = Math.round(data.wind_speed_10m);
-        state.weather.windDir = data.wind_direction_10m;
-        state.weather.pressure = (data.surface_pressure * 0.02953).toFixed(2);
-
-        document.getElementById("wx-temp").textContent = `${state.weather.temp}°F`;
-        document.getElementById("wx-wind").textContent = `${state.weather.windSpeed} mph`;
-        document.getElementById("wx-dir").textContent = getCompassDirection(state.weather.windDir);
-        document.getElementById("wx-press").textContent = `${state.weather.pressure}`;
-
-        const rating = calculateFishingRating(state.weather.windSpeed, state.weather.pressure);
-        const rEl = document.getElementById("wx-rating");
-        rEl.textContent = rating.label;
-        rEl.style.backgroundColor = rating.color;
-
-      } catch (err) {
-        console.warn("Weather error:", err);
-        document.getElementById("wx-temp").textContent = "--";
-        document.getElementById("wx-wind").textContent = "--";
-        document.getElementById("wx-dir").textContent = "--";
-        document.getElementById("wx-press").textContent = "--";
-        document.getElementById("wx-rating").textContent = "N/A";
-        document.getElementById("wx-rating").style.backgroundColor = "#64748b";
-        showToast("Weather temporarily unavailable");
-      }
-    }
-
-    function getCompassDirection(deg) {
-      const dirs = ['N', 'NE', 'E', 'SE', 'S', 'SW', 'W', 'NW'];
-      return dirs[Math.round(deg / 45) % 8];
-    }
-
-    function calculateFishingRating(wind, press) {
-      let score = 70;
-      if (wind >= 5 && wind <= 15) score += 15;
-      else if (wind > 20) score -= 20;
-
-      const p = parseFloat(press);
-      if (p >= 29.90 && p <= 30.15) score += 15;
-      else if (p < 29.80) score += 10;
-
-      if (score >= 85) return { label: "EXCELLENT", color: "#16a34a" };
-      if (score >= 70) return { label: "GOOD", color: "#0284c7" };
-      if (score >= 50) return { label: "FAIR", color: "#eab308" };
-      return { label: "POOR", color: "#dc2626" };
-    }
-
-    /**
-     * TURF.JS GEOMETRY PIPELINE (Guarantees Shoreline Water Boundary)
-     */
-    function getLakeWaterPolygon(boundaryCoords) {
-      const line = turf.lineString(boundaryCoords);
-      const smoothed = turf.bezierSpline(line);
-      const coords = smoothed.geometry.coordinates;
-      coords.push(coords[0]); // Ensure closed ring
-      return turf.polygon([coords]);
-    }
-
-    /**
-     * RENDER CONTOUR ELEVATION LINES
-     */
-    function renderLakeContours(lake, waterPoly) {
-      const depths = [5, 10, 15, 20];
-
-      depths.forEach((depth, idx) => {
-        // Compute inset rings based on shoreline distance
-        const inset = turf.buffer(waterPoly, -0.05 * (idx + 1), { units: 'miles' });
-        if (inset) {
-          const lines = turf.polygonToLine(inset);
-          L.geoJSON(lines, {
-            style: {
-              color: "#38bdf8",
-              weight: 1.5,
-              dashArray: "4, 4",
-              opacity: 0.85
-            }
-          }).bindTooltip(`${depth} FT Contour Line`, { sticky: true })
-            .addTo(layers.contours);
-        }
-      });
-    }
-
-    /**
-     * SALT STRONG STYLE HIGH-PROBABILITY BASS ZONES GENERATOR
-     * Builds irregular polygons along drop-offs, channels, points, and attractors strictly inside water
-     */
-    function renderSaltStrongBassZones(lake, waterPoly) {
-      const zoneFeatures = [];
-
-      // 1. Generate Channel Drop-Off Polygons (Blue Trophy Zones)
-      if (lake.structures.channels) {
-        lake.structures.channels.forEach(chan => {
-          const line = turf.lineString(chan);
-          const chanBuffer = turf.buffer(line, 0.12, { units: 'miles' });
-          const clipped = turf.intersect(chanBuffer, waterPoly);
-          if (clipped) {
-            zoneFeatures.push({
-              geometry: clipped,
-              tier: "trophy",
-              color: "#0284c7",
-              title: "TROPHY BASS ZONE",
-              desc: "Deep river/channel ledge drop-off. Prime big bass holding transition zone."
-            });
+    // 2. Add Grass/Hydrilla Habitat Layer
+    map.addSource('grass-src', {
+      type: 'geojson',
+      data: {
+        type: 'FeatureCollection',
+        features: [
+          {
+            type: 'Feature',
+            geometry: {
+              type: 'Polygon',
+              coordinates: [[
+                [-81.36, 28.21], [-81.34, 28.21], [-81.34, 28.19], [-81.36, 28.19], [-81.36, 28.21]
+              ]]
+            },
+            properties: { type: 'Dense Hydrilla & Kissimmee Grass' }
           }
-        });
+        ]
       }
+    });
 
-      // 2. Generate Underwater Hump / Shoal Polygons (Blue & Green Zones)
-      if (lake.structures.humps) {
-        lake.structures.humps.forEach(h => {
-          const pt = turf.point(h);
-          const humpPoly = turf.buffer(pt, 0.15, { units: 'miles' });
-          const clipped = turf.intersect(humpPoly, waterPoly);
-          if (clipped) {
-            zoneFeatures.push({
-              geometry: clipped,
-              tier: "trophy",
-              color: "#0284c7",
-              title: "TROPHY BASS HUMP",
-              desc: "Isolated offshore hump with surrounding deep water access."
-            });
-          }
-        });
+    map.addLayer({
+      id: 'grass',
+      type: 'fill',
+      source: 'grass-src',
+      paint: { 'fill-color': '#22c55e', 'fill-opacity': 0.35 }
+    });
+
+    // 3. Add Smart Spot Predictions
+    map.addSource('spots-src', {
+      type: 'geojson',
+      data: {
+        type: 'FeatureCollection',
+        features: [
+          { type: 'Feature', geometry: { type: 'Point', coordinates: [-81.355, 28.205] }, properties: { name: 'Windward Point - Hydrilla Pocket', score: 9.2 } },
+          { type: 'Feature', geometry: { type: 'Point', coordinates: [-81.338, 28.195] }, properties: { name: 'Creek Mouth Ledge', score: 8.7 } }
+        ]
       }
+    });
 
-      // 3. Generate Primary Shoreline Point Polygons (Green High Potential)
-      if (lake.structures.points) {
-        lake.structures.points.forEach(p => {
-          const line = turf.lineString(p);
-          const pointBuffer = turf.buffer(line, 0.1, { units: 'miles' });
-          const clipped = turf.intersect(pointBuffer, waterPoly);
-          if (clipped) {
-            zoneFeatures.push({
-              geometry: clipped,
-              tier: "high",
-              color: "#22c55e",
-              title: "HIGH POTENTIAL POINT",
-              desc: "Underwater point intercepting moving baitfish currents."
-            });
-          }
-        });
+    map.addLayer({
+      id: 'spots',
+      type: 'circle',
+      source: 'spots-src',
+      paint: {
+        'circle-radius': 12,
+        'circle-color': '#ef4444',
+        'circle-stroke-width': 3,
+        'circle-stroke-color': '#ffffff',
+        'circle-opacity': 0.85
       }
+    });
 
-      // 4. Generate Shallow Flat Adjacency Polygons (Yellow Secondary Potential)
-      if (lake.structures.flats) {
-        lake.structures.flats.forEach(f => {
-          const line = turf.lineString(f);
-          const flatBuffer = turf.buffer(line, 0.14, { units: 'miles' });
-          const clipped = turf.intersect(flatBuffer, waterPoly);
-          if (clipped) {
-            zoneFeatures.push({
-              geometry: clipped,
-              tier: "secondary",
-              color: "#eab308",
-              title: "SECONDARY POTENTIAL FLAT",
-              desc: "Shallow spawning flat adjacent to feeding ledges."
-            });
-          }
-        });
-      }
+    // Click event for Smart Spots
+    map.on('click', 'spots', (e) => {
+      const coordinates = e.features[0].geometry.coordinates.slice();
+      const props = e.features[0].properties;
 
-      // Render Polygons to Map Layer
-      zoneFeatures.forEach(zone => {
-        L.geoJSON(zone.geometry, {
-          style: {
-            fillColor: zone.color,
-            fillOpacity: 0.55,
-            color: zone.color,
-            weight: 2,
-            opacity: 0.95
-          }
-        }).bindPopup(`
-          <div style="font-family:sans-serif;">
-            <h4 style="color:${zone.color};margin-bottom:4px;font-weight:800;">${zone.title}</h4>
-            <p style="font-size:0.85rem;color:#334155;">${zone.desc}</p>
-          </div>
-        `).addTo(layers.zones);
-      });
-    }
+      new mapboxgl.Popup()
+        .setLngLat(coordinates)
+        .setHTML(`<strong>${props.name}</strong><br>Bite Rating: <strong>${props.score}/10</strong><br><em>Tip: Pitch punching rigs into windward hydrilla edges.</em>`)
+        .addTo(map);
+    });
+  });
 
-    /**
-     * RENDER FWC ATTRACTORS
-     */
-    function renderAttractors(attList) {
-      attList.forEach(att => {
-        const marker = L.circleMarker([att.lat, att.lng], {
-          radius: 7,
-          fillColor: "#a855f7",
-          color: "#ffffff",
-          weight: 2,
-          opacity: 1,
-          fillOpacity: 0.95
-        });
+  function flyToLake(key) {
+    map.flyTo({ center: lakes[key].center, zoom: lakes[key].zoom, essential: true });
+  }
 
-        marker.bindPopup(`
-          <div style="font-family:sans-serif;">
-            <h4 style="color:#9333ea;margin-bottom:4px;">🟣 FWC Fish Attractor</h4>
-            <p style="font-size:0.8rem;margin-bottom:2px;"><b>Description:</b> ${att.desc}</p>
-            <p style="font-size:0.8rem;margin-bottom:2px;"><b>Depth:</b> ${att.depth}</p>
-            <p style="font-size:0.75rem;color:#64748b;"><b>Coords:</b> ${att.lat.toFixed(4)}, ${att.lng.toFixed(4)}</p>
-          </div>
-        `);
+  function toggleLayer(id) {
+    const visibility = map.getLayoutProperty(id, 'visibility');
+    map.setLayoutProperty(id, 'visibility', visibility === 'none' ? 'visible' : 'none');
+  }
 
-        marker.addTo(layers.attractors);
-      });
-    }
-
-    /**
-     * RENDER WIND DIRECTION ARROWS
-     */
-    function renderWindArrows(waterPoly) {
-      if (state.weather.windDir === null) return;
-
-      const bbox = turf.bbox(waterPoly);
-      const grid = turf.pointGrid(bbox, 0.55, { units: 'miles' });
-      const windDeg = state.weather.windDir;
-
-      grid.features.forEach(pt => {
-        if (turf.booleanPointInPolygon(pt, waterPoly)) {
-          const coords = pt.geometry.coordinates;
-
-          const arrowIcon = L.divIcon({
-            className: 'wind-icon',
-            html: `<div style="transform: rotate(${windDeg}deg); font-size: 16px; color: #ffffff; text-shadow: 0 0 4px #000;">⬆</div>`,
-            iconSize: [20, 20],
-            iconAnchor: [10, 10]
-          });
-
-          L.marker([coords[1], coords[0]], { icon: arrowIcon, interactive: false }).addTo(layers.wind);
-        }
-      });
-    }
-
-    function showToast(msg) {
-      const toast = document.getElementById("status-toast");
-      toast.textContent = msg;
-      toast.style.display = "block";
-      setTimeout(() => { toast.style.display = "none"; }, 4000);
-    }
-  </script>
+  function updateConditions() {
+    const windDeg = document.getElementById('wind').value;
+    // Calculate dynamic strike score based on wind angle logic
+    const score = (7.0 + (Math.sin(windDeg * Math.PI / 180) * 1.8)).toFixed(1);
+    document.getElementById('strike-score').innerText = `${score} / 10`;
+  }
+</script>
 </body>
 </html>
