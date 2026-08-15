@@ -1,8 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
 
 <title>Florida Big Bass Finder</title>
 
@@ -76,7 +80,7 @@ select {
 
 #map {
     width:100%;
-    height:450px;
+    height:500px;
     background:#ccc;
     border-radius:10px;
 }
@@ -93,7 +97,45 @@ button {
     font-weight:bold;
 }
 
+.legend {
+    background:#102630;
+    padding:12px;
+    border-radius:8px;
+    margin-top:10px;
+    line-height:1.8;
+}
+
+.dot {
+    display:inline-block;
+    width:13px;
+    height:13px;
+    border-radius:50%;
+    margin-right:6px;
+}
+
+.blue {
+    background:#0066ff;
+}
+
+.green {
+    background:#00cc55;
+}
+
+.yellow {
+    background:#ffd400;
+}
+
+.status {
+    margin-top:10px;
+    padding:10px;
+    background:#081a23;
+    color:#b9d4dc;
+    border-radius:8px;
+    font-size:13px;
+}
+
 </style>
+
 </head>
 
 <body>
@@ -106,7 +148,9 @@ button {
 
 </header>
 
+
 <div class="container">
+
 
 <div class="card">
 
@@ -114,45 +158,46 @@ button {
 
 <select id="lake">
 
-<option value="28.14405,-80.74552">
+<option value="Lake Washington|28.14405|-80.74552|13">
 Lake Washington
 </option>
 
-<option value="28.33802,-80.83309">
+<option value="Lake Poinsett|28.33802|-80.83309|13">
 Lake Poinsett
 </option>
 
-<option value="28.7800,-81.8000">
+<option value="Harris Chain|28.7800|-81.8000|11">
 Harris Chain
 </option>
 
-<option value="28.1600,-81.6000">
+<option value="Alligator Chain|28.1600|-81.6000|11">
 Alligator Chain
 </option>
 
-<option value="28.7000,-81.5000">
+<option value="St. Johns River|28.7000|-81.5000|10">
 St. Johns River
 </option>
 
-<option value="27.91069,-81.26696">
+<option value="Lake Kissimmee|27.91069|-81.26696|12">
 Lake Kissimmee
 </option>
 
-<option value="27.7267,-80.7748">
+<option value="Blue Cypress Lake|27.7267|-80.7748|13">
 Blue Cypress Lake
 </option>
 
-<option value="29.2857,-81.5960">
+<option value="Lake George|29.2857|-81.5960|12">
 Lake George
 </option>
 
-<option value="28.6240,-81.6261">
+<option value="Lake Apopka|28.6240|-81.6261|12">
 Lake Apopka
 </option>
 
 </select>
 
 </div>
+
 
 <div class="card">
 
@@ -162,27 +207,53 @@ Lake Washington
 
 <div class="conditions">
 
+
 <div class="condition">
+
 <span>Air Temperature</span>
-<strong id="airTemp">Loading...</strong>
+
+<strong id="airTemp">
+Loading...
+</strong>
+
 </div>
 
+
 <div class="condition">
+
 <span>Wind</span>
-<strong id="wind">Loading...</strong>
+
+<strong id="wind">
+Loading...
+</strong>
+
 </div>
 
+
 <div class="condition">
+
 <span>Barometric Pressure</span>
-<strong id="pressure">Loading...</strong>
+
+<strong id="pressure">
+Loading...
+</strong>
+
 </div>
+
 
 <div class="condition">
+
 <span>Fishing Rating</span>
-<strong id="rating">Loading...</strong>
-</div>
+
+<strong id="rating">
+Loading...
+</strong>
 
 </div>
+
+
+</div>
+
 
 <button onclick="loadWeather()">
 Refresh Current Conditions
@@ -190,122 +261,772 @@ Refresh Current Conditions
 
 </div>
 
+
 <div class="card">
 
-<h2>🗺️ Lake Map</h2>
+<h2>
+🗺️ Bottom & Fishing Map
+</h2>
 
-<div id="map"></div>
+<div id="map">
+</div>
+
+
+<div class="legend">
+
+<strong>Fishing Analysis</strong><br>
+
+<span class="dot blue"></span>
+🔵 Trophy Bass Potential<br>
+
+<span class="dot green"></span>
+🟢 High Potential<br>
+
+<span class="dot yellow"></span>
+🟡 Secondary Potential<br>
+
+</div>
+
+
+<div id="status"
+class="status">
+
+Loading lake data...
 
 </div>
 
 </div>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+</div>
+
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+</script>
+
 
 <script>
 
-/* MAP */
+/* =====================================================
+   MAP
+===================================================== */
 
-const map = L.map("map").setView(
+const map =
+L.map("map").setView(
     [28.14405,-80.74552],
     13
 );
 
+
+/* =====================================================
+   SATELLITE MAP
+===================================================== */
+
+const satellite =
 L.tileLayer(
-    "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-    {
-        maxZoom:19,
-        attribution:"© OpenStreetMap contributors"
-    }
+
+"https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+
+{
+    maxZoom:19,
+    attribution:"Tiles © Esri"
+}
+
 ).addTo(map);
 
 
-/* LAKE CHANGE */
+/* =====================================================
+   STREET MAP
+===================================================== */
 
-document.getElementById("lake")
-.addEventListener("change",function(){
+const street =
+L.tileLayer(
 
-    const parts =
-        this.value.split(",");
+"https://tile.openstreetmap.org/{z}/{x}/{y}.png",
 
-    const lat =
-        Number(parts[0]);
+{
+    maxZoom:19,
+    attribution:"© OpenStreetMap contributors"
+}
 
-    const lon =
-        Number(parts[1]);
+);
 
-    const name =
-        this.options[
-            this.selectedIndex
-        ].text;
 
-    document.getElementById("lakeName")
-        .textContent = name;
+/* =====================================================
+   FWC BATHYMETRY RASTER MAP
+===================================================== */
 
-    map.setView(
+const fwcBottomMap =
+L.tileLayer(
+
+"https://ocean.floridamarine.org/arcgis/rest/services/Projects_FWC/WHOML_bathymetryService/MapServer/tile/{z}/{y}/{x}",
+
+{
+    opacity:0.65,
+    attribution:
+    "Florida Fish and Wildlife Conservation Commission"
+}
+
+);
+
+
+/*
+   Some ArcGIS services don't provide normal
+   Leaflet tiles at every zoom.
+
+   Therefore this layer is optional.
+   The rest of the map will continue working
+   if the FWC tiles are unavailable.
+*/
+
+
+/* =====================================================
+   LAYER CONTROL
+===================================================== */
+
+L.control.layers(
+
+{
+    "Satellite":satellite,
+    "Street Map":street
+},
+
+{
+    "FWC Bottom Map":fwcBottomMap
+},
+
+{
+    collapsed:false
+}
+
+).addTo(map);
+
+
+/* =====================================================
+   FWC SERVICES
+===================================================== */
+
+const BATHYMETRY_SERVICE =
+
+"https://ocean.floridamarine.org/arcgis/rest/services/Projects_FWC/WHOML_bathymetryService/MapServer/3";
+
+
+const FISH_ATTRACTOR_SERVICE =
+
+"https://ocean.floridamarine.org/arcgis/rest/services/Projects_FWC/WhatsHappeningOnMyLake/MapServer/11";
+
+
+/* =====================================================
+   MARKER LAYERS
+===================================================== */
+
+let analysisMarkers =
+L.layerGroup().addTo(map);
+
+let attractorMarkers =
+L.layerGroup().addTo(map);
+
+
+/* =====================================================
+   CREATE COLORED DOT
+===================================================== */
+
+function createDot(
+    lat,
+    lon,
+    color,
+    title,
+    description
+) {
+
+    const marker =
+    L.circleMarker(
+
         [lat,lon],
-        13
+
+        {
+            radius:9,
+            fillColor:color,
+            color:"#ffffff",
+            weight:2,
+            opacity:1,
+            fillOpacity:.9
+        }
+
     );
 
-    loadWeather();
 
-});
+    marker.bindPopup(
 
+        "<strong>" +
+        title +
+        "</strong><br>" +
+        description
 
-/* WEATHER */
-
-async function loadWeather(){
-
-    const select =
-        document.getElementById("lake");
-
-    const parts =
-        select.value.split(",");
-
-    const lat =
-        Number(parts[0]);
-
-    const lon =
-        Number(parts[1]);
+    );
 
 
-    document.getElementById("airTemp")
-        .textContent="Loading...";
+    return marker;
+}
 
-    document.getElementById("wind")
-        .textContent="Loading...";
 
-    document.getElementById("pressure")
-        .textContent="Loading...";
+/* =====================================================
+   LOAD FWC FISH ATTRACTORS
+===================================================== */
 
-    document.getElementById("rating")
-        .textContent="Loading...";
+async function loadFishAttractors(
+    lakeName
+) {
+
+    attractorMarkers.clearLayers();
 
 
     const url =
-        "https://api.open-meteo.com/v1/forecast" +
 
-        "?latitude=" + lat +
+        FISH_ATTRACTOR_SERVICE +
 
-        "&longitude=" + lon +
+        "/query" +
 
-        "&current=" +
-        "temperature_2m," +
-        "surface_pressure," +
-        "wind_speed_10m," +
-        "wind_direction_10m" +
+        "?where=" +
 
-        "&temperature_unit=fahrenheit" +
+        encodeURIComponent(
 
-        "&wind_speed_unit=mph" +
+            "WATERBODY LIKE '%" +
+            lakeName.replace(
+                /'/g,
+                "''"
+            ) +
+            "%'"
 
-        "&timezone=auto";
+        ) +
+
+        "&outFields=*" +
+
+        "&returnGeometry=true" +
+
+        "&outSR=4326" +
+
+        "&f=geojson";
 
 
     try {
 
         const response =
-            await fetch(url);
+        await fetch(url);
+
+
+        if(!response.ok) {
+            return;
+        }
+
+
+        const data =
+        await response.json();
+
+
+        if(
+            !data.features ||
+            data.features.length===0
+        ) {
+
+            return;
+        }
+
+
+        data.features.forEach(
+        function(feature){
+
+            if(
+                !feature.geometry ||
+                !feature.geometry.coordinates
+            ) {
+                return;
+            }
+
+
+            const lon =
+            feature.geometry.coordinates[0];
+
+            const lat =
+            feature.geometry.coordinates[1];
+
+
+            const props =
+            feature.properties || {};
+
+
+            const name =
+            props.NAME ||
+            "FWC Fish Attractor";
+
+
+            const material =
+            props.MATERIAL ||
+            "Fish attractor";
+
+
+            const marker =
+            createDot(
+
+                lat,
+                lon,
+
+                "#00cc55",
+
+                "🟢 FWC Fish Attractor",
+
+                name +
+                "<br>" +
+                material
+
+            );
+
+
+            attractorMarkers
+            .addLayer(marker);
+
+        });
+
+    }
+
+    catch(error) {
+
+        console.log(
+            "Fish attractor data unavailable",
+            error
+        );
+
+    }
+
+}
+
+
+/* =====================================================
+   LOAD BATHYMETRY DEPTH ZONES
+===================================================== */
+
+async function loadDepthZones(
+    lakeName
+) {
+
+    analysisMarkers.clearLayers();
+
+
+    const status =
+    document.getElementById(
+        "status"
+    );
+
+
+    status.textContent =
+    "Loading FWC depth information for " +
+    lakeName +
+    "...";
+
+
+    const where =
+
+        "Waterbody LIKE '" +
+
+        lakeName.replace(
+            /'/g,
+            "''"
+        ) +
+
+        "%'";
+
+
+    const url =
+
+        BATHYMETRY_SERVICE +
+
+        "/query" +
+
+        "?where=" +
+
+        encodeURIComponent(
+            where
+        ) +
+
+        "&outFields=Waterbody,Depth_Feet,Depth_Meters" +
+
+        "&returnGeometry=true" +
+
+        "&outSR=4326" +
+
+        "&f=geojson";
+
+
+    try {
+
+        const response =
+        await fetch(url);
+
+
+        if(!response.ok) {
+
+            throw new Error(
+                "FWC request failed"
+            );
+
+        }
+
+
+        const data =
+        await response.json();
+
+
+        if(
+            !data.features ||
+            data.features.length===0
+        ) {
+
+            status.textContent =
+            "No FWC bathymetry was found for this lake. Satellite map is still working.";
+
+            return;
+        }
+
+
+        /*
+           Sort depth zones deepest first.
+        */
+
+        const features =
+        data.features
+        .filter(
+            function(f){
+
+                return (
+                    f.geometry &&
+                    f.properties &&
+                    f.properties.Depth_Feet !== null
+                );
+
+            }
+        )
+        .sort(
+            function(a,b){
+
+                return (
+                    Number(
+                        a.properties.Depth_Feet
+                    )
+                    -
+                    Number(
+                        b.properties.Depth_Feet
+                    )
+                );
+
+            }
+        );
+
+
+        /*
+           We don't put hundreds of dots on the map.
+           Use representative depth zones.
+        */
+
+        const selected = [];
+
+
+        for(
+            let i=0;
+            i<features.length;
+            i++
+        ) {
+
+            const feature =
+            features[i];
+
+
+            const depth =
+            Math.abs(
+                Number(
+                    feature.properties.Depth_Feet
+                )
+            );
+
+
+            if(
+                depth >= 15
+            ) {
+
+                selected.push({
+                    feature:feature,
+                    type:"blue"
+                });
+
+                break;
+
+            }
+
+        }
+
+
+        for(
+            let i=0;
+            i<features.length;
+            i++
+        ) {
+
+            const feature =
+            features[i];
+
+
+            const depth =
+            Math.abs(
+                Number(
+                    feature.properties.Depth_Feet
+                )
+            );
+
+
+            if(
+                depth >= 8 &&
+                depth < 15
+            ) {
+
+                selected.push({
+                    feature:feature,
+                    type:"green"
+                });
+
+                break;
+
+            }
+
+        }
+
+
+        for(
+            let i=features.length-1;
+            i>=0;
+            i--
+        ) {
+
+            const feature =
+            features[i];
+
+
+            const depth =
+            Math.abs(
+                Number(
+                    feature.properties.Depth_Feet
+                )
+            );
+
+
+            if(
+                depth >= 3 &&
+                depth < 8
+            ) {
+
+                selected.push({
+                    feature:feature,
+                    type:"yellow"
+                });
+
+                break;
+
+            }
+
+        }
+
+
+        /*
+           Add representative dots.
+        */
+
+        selected.forEach(
+        function(item){
+
+            const layer =
+            L.geoJSON(
+                item.feature
+            );
+
+
+            const center =
+            layer
+            .getBounds()
+            .getCenter();
+
+
+            const depth =
+            Math.abs(
+                Number(
+                    item.feature.properties.Depth_Feet
+                )
+            );
+
+
+            let color =
+            "#ffd400";
+
+            let title =
+            "🟡 Secondary Potential";
+
+            let explanation =
+            "Shallow-to-mid depth zone.";
+
+
+            if(
+                item.type==="green"
+            ) {
+
+                color =
+                "#00cc55";
+
+                title =
+                "🟢 High Potential";
+
+                explanation =
+                "Depth transition zone that may be worth checking.";
+
+            }
+
+
+            if(
+                item.type==="blue"
+            ) {
+
+                color =
+                "#0066ff";
+
+                title =
+                "🔵 Trophy Bass Potential";
+
+                explanation =
+                "Deep-water zone. Deep water can provide important summer and winter habitat.";
+
+            }
+
+
+            const marker =
+            createDot(
+
+                center.lat,
+                center.lng,
+
+                color,
+
+                title,
+
+                "FWC depth: " +
+                depth +
+                " feet<br>" +
+                explanation
+
+            );
+
+
+            analysisMarkers
+            .addLayer(marker);
+
+        });
+
+
+        status.textContent =
+
+        "FWC bottom/depth information loaded for " +
+        lakeName +
+        ". Colored dots show representative depth zones, not guaranteed fish locations.";
+
+    }
+
+    catch(error) {
+
+        console.error(error);
+
+        status.textContent =
+        "FWC depth data could not be loaded. The satellite map and weather still work.";
+
+    }
+
+}
+
+
+/* =====================================================
+   WEATHER
+===================================================== */
+
+async function loadWeather(){
+
+    const select =
+    document.getElementById(
+        "lake"
+    );
+
+
+    const parts =
+    select.value.split("|");
+
+
+    const lat =
+    Number(parts[1]);
+
+
+    const lon =
+    Number(parts[2]);
+
+
+    document.getElementById(
+        "airTemp"
+    ).textContent =
+    "Loading...";
+
+
+    document.getElementById(
+        "wind"
+    ).textContent =
+    "Loading...";
+
+
+    document.getElementById(
+        "pressure"
+    ).textContent =
+    "Loading...";
+
+
+    document.getElementById(
+        "rating"
+    ).textContent =
+    "Loading...";
+
+
+    const url =
+
+    "https://api.open-meteo.com/v1/forecast" +
+
+    "?latitude=" +
+    lat +
+
+    "&longitude=" +
+    lon +
+
+    "&current=" +
+
+    "temperature_2m," +
+
+    "surface_pressure," +
+
+    "wind_speed_10m," +
+
+    "wind_direction_10m" +
+
+    "&temperature_unit=fahrenheit" +
+
+    "&wind_speed_unit=mph" +
+
+    "&timezone=auto";
+
+
+    try {
+
+        const response =
+        await fetch(url);
+
 
         if(!response.ok){
 
@@ -315,91 +1036,120 @@ async function loadWeather(){
 
         }
 
+
         const data =
-            await response.json();
+        await response.json();
+
 
         const current =
-            data.current;
+        data.current;
 
 
         const temp =
-            Number(
-                current.temperature_2m
-            );
+        Number(
+            current.temperature_2m
+        );
+
 
         const windSpeed =
-            Number(
-                current.wind_speed_10m
-            );
+        Number(
+            current.wind_speed_10m
+        );
+
 
         const windDirection =
-            Number(
-                current.wind_direction_10m
-            );
+        Number(
+            current.wind_direction_10m
+        );
+
 
         const pressure =
-            Number(
-                current.surface_pressure
-            ) * 0.0295299833;
+        Number(
+            current.surface_pressure
+        )
+        *
+        0.0295299833;
 
 
-        const directions=[
-            "N","NE","E","SE",
-            "S","SW","W","NW"
+        const directions = [
+
+            "N",
+            "NE",
+            "E",
+            "SE",
+            "S",
+            "SW",
+            "W",
+            "NW"
+
         ];
 
+
         const compass =
-            directions[
-                Math.round(
-                    windDirection / 45
-                ) % 8
-            ];
+        directions[
+            Math.round(
+                windDirection / 45
+            ) % 8
+        ];
 
 
-        document.getElementById("airTemp")
-            .textContent =
-            temp.toFixed(1)+"°F";
+        document.getElementById(
+            "airTemp"
+        ).textContent =
+
+        temp.toFixed(1) +
+        "°F";
 
 
-        document.getElementById("wind")
-            .textContent =
-            compass+" "+
-            windSpeed.toFixed(1)+
-            " MPH";
+        document.getElementById(
+            "wind"
+        ).textContent =
+
+        compass +
+        " " +
+        windSpeed.toFixed(1) +
+        " MPH";
 
 
-        document.getElementById("pressure")
-            .textContent =
-            pressure.toFixed(2)+
-            " inHg";
+        document.getElementById(
+            "pressure"
+        ).textContent =
+
+        pressure.toFixed(2) +
+        " inHg";
 
 
-        let rating="FAIR";
+        let rating =
+        "FAIR";
 
 
         if(
-            pressure>=29.80 &&
-            pressure<=30.20 &&
-            windSpeed>=5 &&
-            windSpeed<=15
+            pressure >= 29.80 &&
+            pressure <= 30.20 &&
+            windSpeed >= 5 &&
+            windSpeed <= 15
         ){
 
-            rating="EXCELLENT";
+            rating =
+            "EXCELLENT";
 
         }
 
         else if(
-            windSpeed>=3 &&
-            windSpeed<=18
+            windSpeed >= 3 &&
+            windSpeed <= 18
         ){
 
-            rating="GOOD";
+            rating =
+            "GOOD";
 
         }
 
 
-        document.getElementById("rating")
-            .textContent=rating;
+        document.getElementById(
+            "rating"
+        ).textContent =
+        rating;
 
     }
 
@@ -407,28 +1157,119 @@ async function loadWeather(){
 
         console.error(error);
 
-        document.getElementById("airTemp")
-            .textContent="ERROR";
 
-        document.getElementById("wind")
-            .textContent="ERROR";
+        document.getElementById(
+            "airTemp"
+        ).textContent =
+        "ERROR";
 
-        document.getElementById("pressure")
-            .textContent="ERROR";
 
-        document.getElementById("rating")
-            .textContent="ERROR";
+        document.getElementById(
+            "wind"
+        ).textContent =
+        "ERROR";
+
+
+        document.getElementById(
+            "pressure"
+        ).textContent =
+        "ERROR";
+
+
+        document.getElementById(
+            "rating"
+        ).textContent =
+        "ERROR";
 
     }
 
 }
 
 
-/* START */
+/* =====================================================
+   CHANGE LAKE
+===================================================== */
 
-loadWeather();
+async function selectLake(){
+
+    const select =
+    document.getElementById(
+        "lake"
+    );
+
+
+    const parts =
+    select.value.split("|");
+
+
+    const name =
+    parts[0];
+
+
+    const lat =
+    Number(parts[1]);
+
+
+    const lon =
+    Number(parts[2]);
+
+
+    const zoom =
+    Number(parts[3]);
+
+
+    document.getElementById(
+        "lakeName"
+    ).textContent =
+    name;
+
+
+    map.setView(
+        [lat,lon],
+        zoom
+    );
+
+
+    /*
+       Weather and FWC information load separately.
+       If FWC fails, weather/map stay alive.
+    */
+
+    loadWeather();
+
+
+    loadDepthZones(
+        name
+    );
+
+
+    loadFishAttractors(
+        name
+    );
+
+}
+
+
+/* =====================================================
+   LAKE CHANGE EVENT
+===================================================== */
+
+document
+.getElementById("lake")
+.addEventListener(
+    "change",
+    selectLake
+);
+
+
+/* =====================================================
+   START
+===================================================== */
+
+selectLake();
 
 </script>
 
 </body>
+
 </html>
