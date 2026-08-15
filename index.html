@@ -618,44 +618,55 @@ satellite.addTo(map);
    Layer 3 contains lake bathymetry polygons.
 */
 
-const bottomLayer=
+const bottomLayer =
 L.esri.dynamicMapLayer({
 
-url:FWC_BATHY_SERVICE,
+url: FWC_BATHY_SERVICE,
 
-layers:[3],
+layers: [3],
 
-opacity:.65,
+opacity: 0.75,
 
-useCors:true,
+useCors: true,
 
 attribution:
-"Bathymetry © Florida Fish and Wildlife Conservation Commission"
+"FWC Bathymetry"
 
 });
 
 
-/* =====================================================
-   FWC DEPTH CONTOURS
-===================================================== */
-
-const contourLayer=
+const contourLayer =
 L.esri.dynamicMapLayer({
 
-url:FWC_WHOME_SERVICE,
+url: FWC_WHOME_SERVICE,
 
-layers:[30],
+layers: [30],
 
-opacity:.95,
+opacity: 1,
 
-useCors:true,
+useCors: true,
 
 attribution:
-"Depth contours © Florida Fish and Wildlife Conservation Commission"
+"FWC Depth Contours"
 
 });
 
 
+const coloredBottomLayer =
+L.esri.dynamicMapLayer({
+
+url: FWC_WHOME_SERVICE,
+
+layers: [31],
+
+opacity: 0.70,
+
+useCors: true,
+
+attribution:
+"FWC Bathymetry"
+
+});
 /* =====================================================
    FWC BATHYMETRY COLOR LAYER
 ===================================================== */
