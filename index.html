@@ -1,4 +1,3 @@
-kes[id];
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1225,50 +1224,49 @@ document.getElementById(
 
 /* =====================================================
    SELECT LAKE
-================================================
+===================================================== */
+
+
+async function selectLake() {
+
+
+const lakeName =
+
+document.getElementById(
+"lake"
+).value;
+
 
 document.getElementById(
 "lakeName"
 ).textContent =
-lake.name;
+lakeName;
 
 
-map.setView(
+const found =
 
-[
-lake.lat,
-lake.lng
-],
+await findLake(
+lakeName
+);
 
-lake.zoom,
 
-{
+if(!found) {
 
-animate:true
+fallbackMapLocation(
+lakeName
+);
 
 }
-
-);
 
 
 loadWeather();
 
-
-document.getElementById(
-"mapStatus"
-).textContent =
-
-"Map centered on " +
-lake.name +
-". Use the layers button to turn FWC bathymetry on or off.";
-
-
 }
 
 
-/* =========================================
+/* =====================================================
    EVENTS
-========================================= */
+===================================================== */
 
 
 document
@@ -1277,7 +1275,7 @@ document
 
 "change",
 
-changeLake
+selectLake
 
 );
 
@@ -1293,22 +1291,15 @@ loadWeather
 );
 
 
-/* =========================================
+/* =====================================================
    START
-========================================= */
+===================================================== */
 
 
-document.getElementById(
-"mapStatus"
-).textContent =
-
-"Map ready. Select a lake, then use the layers button to view satellite imagery, street maps and FWC bathymetry.";
-
-
-loadWeather();
-
+selectLake();
 
 </script>
+
 
 </body>
 
