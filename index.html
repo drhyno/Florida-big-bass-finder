@@ -829,6 +829,51 @@ function(){
 
 bottomOn=!bottomOn;
 
+if(bottomOn){
+
+coloredBottomLayer
+.addTo(map);
+
+setActive(
+"bottomButton",
+true
+);
+
+status(
+"FWC bottom bathymetry turned ON."
+);
+
+}
+else{
+
+if(
+map.hasLayer(coloredBottomLayer)
+){
+
+map.removeLayer(
+coloredBottomLayer
+);
+
+}
+
+setActive(
+"bottomButton",
+false
+);
+
+status(
+"FWC bottom bathymetry turned OFF."
+);
+
+}
+
+map.invalidateSize();
+
+}
+);
+
+bottomOn=!bottomOn;
+
 
 if(bottomOn){
 
