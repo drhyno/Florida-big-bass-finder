@@ -1,8 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<meta name="viewport"
+content="width=device-width,initial-scale=1.0">
 
 <title>Florida Big Bass Finder</title>
 
@@ -162,30 +166,20 @@ vertical-align:-2px;
 border:1px solid white;
 }
 
-.blue{background:#0066ff}
-.green{background:#00c853}
-.yellow{background:#ffd400}
-.purple{background:#a020f0}
-
-.windArrow{
-font-size:23px;
-font-weight:bold;
-color:#ff8c00;
-text-shadow:
-1px 1px 2px #000,
--1px -1px 2px #000,
-1px -1px 2px #000,
--1px 1px 2px #000;
+.blue{
+background:#0066ff;
 }
 
-.depthLabel{
-font-size:10px;
-font-weight:bold;
-background:white;
-color:#004b91;
-border:1px solid #004b91;
-padding:1px 3px;
-border-radius:3px;
+.green{
+background:#00c853;
+}
+
+.yellow{
+background:#ffd400;
+}
+
+.purple{
+background:#a020f0;
 }
 
 @media(max-width:600px){
@@ -201,13 +195,17 @@ font-size:21px;
 }
 
 </style>
+
 </head>
 
 <body>
 
 <header>
+
 <h1>🎣 Florida Big Bass Finder</h1>
+
 <p>Science-based bass location prediction</p>
+
 </header>
 
 <div class="container">
@@ -269,23 +267,51 @@ Lake Washington
 <div class="conditions">
 
 <div class="condition">
-<span>Air Temperature</span>
-<strong id="airTemp">Loading...</strong>
+
+<span>
+Air Temperature
+</span>
+
+<strong id="airTemp">
+Loading...
+</strong>
+
 </div>
 
 <div class="condition">
-<span>Wind</span>
-<strong id="wind">Loading...</strong>
+
+<span>
+Wind
+</span>
+
+<strong id="wind">
+Loading...
+</strong>
+
 </div>
 
 <div class="condition">
-<span>Barometric Pressure</span>
-<strong id="pressure">Loading...</strong>
+
+<span>
+Barometric Pressure
+</span>
+
+<strong id="pressure">
+Loading...
+</strong>
+
 </div>
 
 <div class="condition">
-<span>Fishing Rating</span>
-<strong id="rating">Loading...</strong>
+
+<span>
+Fishing Rating
+</span>
+
+<strong id="rating">
+Loading...
+</strong>
+
 </div>
 
 </div>
@@ -298,1508 +324,185 @@ Refresh Current Conditions
 
 <div class="card">
 
-<h2>🗺️ Fishing Map</h2>
+<h2>
+🗺️ Fishing Map
+</h2>
 
 <div class="mapButtons">
 
 <button
 id="satelliteButton"
 class="mapButton active">
+
 🛰️ Satellite
+
 </button>
 
 <button
 id="streetButton"
 class="mapButton">
+
 🗺️ Street
+
 </button>
 
 <button
 id="bottomButton"
 class="mapButton">
+
 🌊 Bottom Map
+
 </button>
 
 <button
 id="windButton"
 class="mapButton">
+
 🌬️ Wind
+
 </button>
 
 </div>
 
-<div id="map"></div>
+<div id="map">
+</div>
 
 <div class="legend">
 
-<strong>Map Legend</strong><br>
+<strong>
+Map Legend
+</strong>
+
+<br>
 
 <span class="dot blue"></span>
-Blue = strongest predicted big-bass potential<br>
+Blue = strongest predicted big-bass potential
+
+<br>
 
 <span class="dot green"></span>
-Green = high predicted potential<br>
+Green = high predicted potential
+
+<br>
 
 <span class="dot yellow"></span>
-Yellow = secondary potential<br>
+Yellow = secondary potential
+
+<br>
 
 <span class="dot purple"></span>
-Purple = actual FWC fish attractor<br>
+Purple = actual FWC fish attractor
 
-<span style="color:#ff8c00;font-size:18px">
+<br>
+
+<span style="font-size:18px">
 ➜
 </span>
+
 Orange = wind direction
 
 </div>
 
-<div id="mapStatus" class="status">
+<div id="mapStatus"
+class="status">
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+Loading map...
+
+</div>
+
+</div>
+
+</div>
+
+<script
+src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+</script>
 
 <script>
 
+
+/* ==============================
+   LAKES
+============================== */
+
 const lakes = {
-  "Lake Washington": {lat:28.1440, lon:-80.7455, zoom:13, names:["Lake Washington"]},
-  "Lake Poinsett": {lat:28.3380, lon:-80.8331, zoom:13, names:["Lake Poinsett"]},
-  "Harris Chain": {lat:28.7800, lon:-81.8000, zoom:11, names:["Lake Harris","Lake Eustis","Lake Dora","Lake Griffin","Lake Beauclair"]},
-  "Alligator Chain": {lat:28.1600, lon:-81.6000, zoom:11, names:["Alligator Lake","Lake Lizzie","Lake Preston"]},
-  "St. Johns River": {lat:28.7000, lon:-81.5000, zoom:10, names:[]},
-  "Lake Kissimmee": {lat:27.9107, lon:-81.2670, zoom:12, names:["Lake Kissimmee"]},
-  "Blue Cypress Lake": {lat:27.7267, lon:-80.7748, zoom:13, names:["Blue Cypress Lake"]},
-  "Lake George": {lat:29.2857, lon:-81.5960, zoom:12, names:["Lake George"]},
-  "Lake Apopka": {lat:28.6240, lon:-81.6261, zoom:12, names:["Lake Apopka"]}
-};
 
-const BATHY =
-"https://ocean.floridamarine.org/arcgis/rest/services/Projects_FWC/WHOML_bathymetryService/MapServer/3";
+"Lake Washington":{
+lat:28.1440,
+lon:-80.7455,
+zoom:13,
+names:["Lake Washington"]
+},
 
-const ATTRACTORS =
-"https://ocean.floridamarine.org/arcgis/rest/services/Projects_FWC/WhatsHappeningOnMyLake/MapServer/11";
+"Lake Poinsett":{
+lat:28.3380,
+lon:-80.8331,
+zoom:13,
+names:["Lake Poinsett"]
+},
 
+"Harris Chain":{
+lat:28.7800,
+lon:-81.8000,
+zoom:11,
+names:[
+"Lake Harris",
+"Lake Eustis",
+"Lake Dora",
+"Lake Griffin",
+"Lake Beauclair"
+]
+},
 
-/* ==============================
-   MAP
-============================== */
+"Alligator Chain":{
+lat:28.1600,
+lon:-81.6000,
+zoom:11,
+names:[
+"Alligator Lake",
+"Lake Lizzie",
+"Lake Preston"
+]
+},
 
-const map = L.map("map", {
-  zoomControl:true
-});
+"St. Johns River":{
+lat:28.7000,
+lon:-81.5000,
+zoom:10,
+names:[]
+},
 
-const satellite = L.tileLayer(
-  "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-  {
-    maxZoom:19,
-    attribution:"Tiles © Esri"
-  }
-);
+"Lake Kissimmee":{
+lat:27.9107,
+lon:-81.2670,
+zoom:12,
+names:["Lake Kissimmee"]
+},
 
-const street = L.tileLayer(
-  "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-  {
-    maxZoom:19,
-    attribution:"© OpenStreetMap contributors"
-  }
-);
+"Blue Cypress Lake":{
+lat:27.7267,
+lon:-80.7748,
+zoom:13,
+names:["Blue Cypress Lake"]
+},
 
+"Lake George":{
+lat:29.2857,
+lon:-81.5960,
+zoom:12,
+names:["Lake George"]
+},
 
-/* START WITH STREET MAP
-   so there is always a visible map */
-
-street.addTo(map);
-
-
-/* ==============================
-   LAYERS
-============================== */
-
-const bottomLayer = L.layerGroup().addTo(map);
-const attractorLayer = L.layerGroup().addTo(map);
-const predictionLayer = L.layerGroup().addTo(map);
-const windLayer = L.layerGroup();
-
-let bottomOn = true;
-let windOn = false;
-let windDirection = 0;
-
-
-/* ==============================
-   FORCE MAP TO DRAW
-============================== */
-
-setTimeout(function(){
-  map.invalidateSize();
-},500);
-
-setTimeout(function(){
-  map.invalidateSize();
-},1500);
-
-
-/* ==============================
-   BUTTONS
-============================== */
-
-const satButton =
-document.getElementById("satelliteButton");
-
-const streetButton =
-document.getElementById("streetButton");
-
-const bottomButton =
-document.getElementById("bottomButton");
-
-const windButton =
-document.getElementById("windButton");
-
-
-if(satButton){
-
-satButton.onclick=function(){
-
-  satellite.addTo(map);
-
-  if(map.hasLayer(street)){
-    map.removeLayer(street);
-  }
-
-  satButton.classList.add("active");
-
-  if(streetButton){
-    streetButton.classList.remove("active");
-  }
-
-  setTimeout(function(){
-    map.invalidateSize();
-  },200);
+"Lake Apopka":{
+lat:28.6240,
+lon:-81.6261,
+zoom:12,
+names:["Lake Apopka"]
+}
 
 };
 
-}
-
-
-if(streetButton){
-
-streetButton.onclick=function(){
-
-  street.addTo(map);
-
-  if(map.hasLayer(satellite)){
-    map.removeLayer(satellite);
-  }
-
-  streetButton.classList.add("active");
-
-  if(satButton){
-    satButton.classList.remove("active");
-  }
-
-  setTimeout(function(){
-    map.invalidateSize();
-  },200);
-
-};
-
-}
-
-
-if(bottomButton){
-
-bottomButton.onclick=function(){
-
-  bottomOn=!bottomOn;
-
-  if(bottomOn){
-
-    bottomLayer.addTo(map);
-    predictionLayer.addTo(map);
-
-    bottomButton.classList.add("active");
-
-  }else{
-
-    map.removeLayer(bottomLayer);
-    map.removeLayer(predictionLayer);
-
-    bottomButton.classList.remove("active");
-
-  }
-
-};
-
-}
-
-
-if(windButton){
-
-windButton.onclick=function(){
-
-  windOn=!windOn;
-
-  if(windOn){
-
-    windLayer.addTo(map);
-    windButton.classList.add("active");
-    drawWind();
-
-  }else{
-
-    map.removeLayer(windLayer);
-    windButton.classList.remove("active");
-
-  }
-
-};
-
-}
-
 
 /* ==============================
-   WEATHER
-============================== */
-
-function compass(degrees){
-
-  const directions=[
-    "N","NE","E","SE",
-    "S","SW","W","NW"
-  ];
-
-  return directions[
-    Math.round(degrees/45)%8
-  ];
-
-}
-
-
-function loadWeather(){
-
-  const lakeName =
-  document.getElementById("lake").value;
-
-  const lake = lakes[lakeName];
-
-  if(!lake) return;
-
-
-  document.getElementById("airTemp").textContent =
-  "Loading...";
-
-  document.getElementById("wind").textContent =
-  "Loading...";
-
-  document.getElementById("pressure").textContent =
-  "Loading...";
-
-  document.getElementById("rating").textContent =
-  "Loading...";
-
-
-  const url =
-  "https://api.open-meteo.com/v1/forecast" +
-  "?latitude="+lake.lat+
-  "&longitude="+lake.lon+
-  "&current=temperature_2m,surface_pressure,wind_speed_10m,wind_direction_10m"+
-  "&temperature_unit=fahrenheit"+
-  "&wind_speed_unit=mph"+
-  "&timezone=auto";
-
-
-  fetch(url)
-
-  .then(function(response){
-
-    if(!response.ok){
-      throw new Error("Weather HTTP "+response.status);
-    }
-
-    return response.json();
-
-  })
-
-  .then(function(data){
-
-    const c=data.current;
-
-    const temperature=
-    Number(c.temperature_2m);
-
-    const speed=
-    Number(c.wind_speed_10m);
-
-    const direction=
-    Number(c.wind_direction_10m);
-
-    const pressure=
-    Number(c.surface_pressure);
-
-
-    windDirection=direction;
-
-
-    document.getElementById("airTemp").textContent =
-    temperature.toFixed(1)+"°F";
-
-
-    document.getElementById("wind").textContent =
-    compass(direction)+" "+
-    speed.toFixed(1)+" MPH";
-
-
-    document.getElementById("pressure").textContent =
-    (pressure*0.0295299833).toFixed(2)+" inHg";
-
-
-    let score=0;
-
-    if(
-      pressure >= 29.80 &&
-      pressure <= 30.20
-    ){
-      score+=2;
-    }
-
-    if(
-      speed >= 5 &&
-      speed <= 15
-    ){
-      score+=2;
-    }
-
-    if(
-      temperature >= 75 &&
-      temperature <= 90
-    ){
-      score+=1;
-    }
-
-
-    let rating="FAIR";
-
-    if(score>=5){
-      rating="EXCELLENT";
-    }else if(score>=4){
-      rating="VERY GOOD";
-    }else if(score>=3){
-      rating="GOOD";
-    }
-
-
-    document.getElementById("rating").textContent =
-    rating;
-
-
-    if(windOn){
-      drawWind();
-    }
-
-  })
-
-  .catch(function(error){
-
-    console.log(error);
-
-    document.getElementById("airTemp").textContent =
-    "Unavailable";
-
-    document.getElementById("wind").textContent =
-    "Unavailable";
-
-    document.getElementById("pressure").textContent =
-    "Unavailable";
-
-    document.getElementById("rating").textContent =
-    "Unavailable";
-
-  });
-
-}
-
-
-/* ==============================
-   FWC QUERY
-============================== */
-
-async function fwcQuery(service,where,fields){
-
-  const url =
-  service+
-  "/query?where="+
-  encodeURIComponent(where)+
-  "&outFields="+
-  encodeURIComponent(fields)+
-  "&returnGeometry=true"+
-  "&outSR=4326"+
-  "&f=geojson";
-
-
-  const controller =
-  new AbortController();
-
-  const timer =
-  setTimeout(function(){
-    controller.abort();
-  },10000);
-
-
-  try{
-
-    const response =
-    await fetch(
-      url,
-      {signal:controller.signal}
-    );
-
-    clearTimeout(timer);
-
-    if(!response.ok){
-      throw new Error("FWC HTTP "+response.status);
-    }
-
-    return await response.json();
-
-  }catch(error){
-
-    clearTimeout(timer);
-    throw error;
-
-  }
-
-}
-
-
-/* ==============================
-   BOTTOM MAP
-============================== */
-
-async function loadBottom(lake){
-
-  bottomLayer.clearLayers();
-
-  let count = 0;
-
-  /*
-     Query the FWC bathymetry service without
-     assuming the exact lake-name spelling.
-  */
-
-  try{
-
-    const data =
-    await fwcQuery(
-      BATHY,
-      "1=1",
-      "Waterbody,Depth_Feet"
-    );
-
-
-    if(
-      !data ||
-      !data.features ||
-      data.features.length === 0
-    ){
-
-      console.log(
-        "FWC returned no bathymetry records"
-      );
-
-      return 0;
-
-    }
-
-
-    /*
-       Find records belonging to the selected lake.
-    */
-
-    const wanted =
-    lake.names.map(function(n){
-
-      return n.toLowerCase();
-
-    });
-
-
-    data.features.forEach(function(feature){
-
-      const p =
-      feature.properties || {};
-
-
-      const waterbody =
-      String(
-        p.Waterbody || ""
-      ).toLowerCase();
-
-
-      let matches = false;
-
-
-      for(
-        const name
-        of wanted
-      ){
-
-        if(
-          waterbody.includes(name) ||
-          name.includes(waterbody)
-        ){
-
-          matches = true;
-          break;
-
-        }
-
-      }
-
-
-      if(!matches){
-        return;
-      }
-
-
-      const raw =
-      Number(
-        p.Depth_Feet
-      );
-
-
-      if(!Number.isFinite(raw)){
-        return;
-      }
-
-
-      const depth =
-      Math.abs(raw);
-
-
-      /*
-         Color the actual FWC bottom data
-         by depth.
-      */
-
-      let fill;
-
-
-      if(depth >= 20){
-
-        fill = "#002b80";
-
-      }
-      else if(depth >= 15){
-
-        fill = "#0055cc";
-
-      }
-      else if(depth >= 10){
-
-        fill = "#008ee8";
-
-      }
-      else if(depth >= 6){
-
-        fill = "#18c8d0";
-
-      }
-      else if(depth >= 3){
-
-        fill = "#65dddd";
-
-      }
-      else{
-
-        fill = "#9deaea";
-
-      }
-
-
-      const layer =
-      L.geoJSON(
-        feature,
-        {
-          style:{
-            color:fill,
-            weight:1,
-            fillColor:fill,
-            fillOpacity:.65
-          }
-        }
-      );
-
-
-      layer.bindPopup(
-
-        "<strong>"+
-        (p.Waterbody || "FWC Bottom Data")+
-        "</strong>"+
-
-        "<br>"+
-
-        "Depth: "+
-        depth+
-        " feet"
-
-      );
-
-
-      bottomLayer.addLayer(layer);
-
-      count++;
-
-    });
-
-
-    /*
-       Put the actual bottom layer on the map.
-    */
-
-    bottomLayer.addTo(map);
-
-
-    console.log(
-      "FWC bottom features loaded:",
-      count
-    );
-
-
-    return count;
-
-  }
-  catch(error){
-
-    console.log(
-      "BOTTOM MAP ERROR:",
-      error
-    );
-
-    return 0;
-
-  }
-
-}
-}
-
-
-/* ==============================
-   FISH ATTRACTORS
-============================== */
-
-async function loadAttractors(lake){
-
-  attractorLayer.clearLayers();
-
-  let count=0;
-
-
-  for(const name of lake.names){
-
-    try{
-
-      const safe =
-      name.replace(/'/g,"''");
-
-
-      const data =
-      await fwcQuery(
-        ATTRACTORS,
-        "WATERBODY='"+safe+"'",
-        "WATERBODY,NAME,MATERIAL,LATITUDE,LONGITUDE,COUNTY"
-      );
-
-
-      if(!data.features) continue;
-
-
-      data.features.forEach(function(feature){
-
-        const p=feature.properties;
-
-
-        const lat=Number(p.LATITUDE);
-        const lon=Number(p.LONGITUDE);
-
-
-        if(
-          !Number.isFinite(lat) ||
-          !Number.isFinite(lon)
-        ){
-          return;
-        }
-
-
-        const marker =
-        L.circleMarker(
-          [lat,lon],
-          {
-            radius:8,
-            color:"#5a087a",
-            weight:2,
-            fillColor:"#a020f0",
-            fillOpacity:1
-          }
-        );
-
-
-        marker.bindPopup(
-          "<strong>🟣 FWC FISH ATTRACTOR</strong>"+
-          "<br><br>"+
-          "Waterbody: "+
-          (p.WATERBODY||name)+
-          "<br>"+
-          "Name: "+
-          (p.NAME||"Fish attractor")+
-          "<br>"+
-          "Material: "+
-          (p.MATERIAL||"Not listed")+
-          "<br>"+
-          "County: "+
-          (p.COUNTY||"")
-        );
-
-
-        attractorLayer.addLayer(marker);
-
-        count++;
-
-      });
-
-    }catch(error){
-
-      console.log(
-        "Attractor unavailable for "+name,
-        error
-      );
-
-    }
-
-  }
-
-
-  return count;
-
-}
-
-
-/* ==============================
-   PREDICTED BASS AREAS
-============================== */
-
-async function loadPredictions(lake){
-
-  predictionLayer.clearLayers();
-
-  let count=0;
-
-
-  /*
-     These are NOT claiming fish are
-     definitely there.
-
-     They are calculated search areas
-     based primarily on depth classes.
-  */
-
-
-  for(const name of lake.names){
-
-    try{
-
-      const safe =
-      name.replace(/'/g,"''");
-
-
-      const data =
-      await fwcQuery(
-        BATHY,
-        "Waterbody='"+safe+"'",
-        "Waterbody,Depth_Feet"
-      );
-
-
-      if(!data.features) continue;
-
-
-      let candidates=[];
-
-
-      data.features.forEach(function(feature){
-
-        const depth=
-        Math.abs(
-          Number(
-            feature.properties.Depth_Feet
-          )
-        );
-
-
-        if(!Number.isFinite(depth)){
-          return;
-        }
-
-
-        const layer=
-        L.geoJSON(feature);
-
-
-        const center=
-        layer.getBounds().getCenter();
-
-
-        candidates.push({
-          lat:center.lat,
-          lon:center.lng,
-          depth:depth
-        });
-
-      });
-
-
-      candidates.sort(
-        function(a,b){
-          return b.depth-a.depth;
-        }
-      );
-
-
-      const chosen=[];
-
-
-      for(const c of candidates){
-
-        if(chosen.length>=10){
-          break;
-        }
-
-
-        let tooClose=false;
-
-
-        for(const old of chosen){
-
-          if(
-            map.distance(
-              [c.lat,c.lon],
-              [old.lat,old.lon]
-            )<300
-          ){
-
-            tooClose=true;
-            break;
-
-          }
-
-        }
-
-
-        if(tooClose){
-          continue;
-        }
-
-
-        let color;
-        let title;
-        let score;
-
-
-        if(c.depth>=15){
-
-          color="#0066ff";
-          title="🔵 Strong Trophy Potential";
-          score=85;
-
-        }
-        else if(c.depth>=8){
-
-          color="#00c853";
-          title="🟢 High Bass Potential";
-          score=72;
-
-        }
-        else if(c.depth>=3){
-
-          color="#ffd400";
-          title="🟡 Secondary Potential";
-          score=58;
-
-        }
-        else{
-
-          continue;
-
-        }
-
-
-        const marker=
-        L.circleMarker(
-          [c.lat,c.lon],
-          {
-            radius:10,
-            color:"#ffffff",
-            weight:2,
-            fillColor:color,
-            fillOpacity:.9
-          }
-        );
-
-
-        marker.bindPopup(
-          "<strong>"+
-          title+
-          "</strong><br><br>"+
-          "Predicted score: "+
-          score+
-          "/100"+
-          "<br>"+
-          "Depth: "+
-          c.depth+
-          " feet"+
-          "<br><br>"+
-          "This is a calculated search area. "+
-          "It is not a guaranteed fish location."
-        );
-
-
-async function loadPredictions(lake){
-
-  predictionLayer.clearLayers();
-
-  let count = 0;
-
-  /*
-     Create calculated fishing areas from
-     the actual FWC bathymetry polygons.
-
-     These are SEARCH AREAS, not claims that
-     a bass is definitely sitting there.
-  */
-
-  for(const name of lake.names){
-
-    try{
-
-      const safe =
-      name.replace(/'/g,"''");
-
-      const data =
-      await fwcQuery(
-        BATHY,
-        "Waterbody='"+safe+"'",
-        "Waterbody,Depth_Feet"
-      );
-
-      if(!data.features){
-        continue;
-      }
-
-
-      /*
-         Look at every bathymetry polygon.
-      */
-
-      for(const feature of data.features){
-
-        const depth =
-        Math.abs(
-          Number(
-            feature.properties.Depth_Feet
-          )
-        );
-
-        if(!Number.isFinite(depth)){
-          continue;
-        }
-
-
-        const polygon =
-        L.geoJSON(feature);
-
-
-        const bounds =
-        polygon.getBounds();
-
-
-        if(!bounds.isValid()){
-          continue;
-        }
-
-
-        const center =
-        bounds.getCenter();
-
-
-        /*
-           Ignore extremely shallow water.
-        */
-
-        if(depth < 3){
-          continue;
-        }
-
-
-        let color;
-        let title;
-        let score;
-        let reason;
-
-
-        /*
-           DEEP WATER
-        */
-
-        if(depth >= 15){
-
-          color = "#0066ff";
-
-          title =
-          "🔵 STRONG TROPHY POTENTIAL";
-
-          score = 85;
-
-          reason =
-          "Deep-water holding area. Look for nearby depth changes, vegetation, bait and current.";
-
-        }
-
-
-        /*
-           MID-DEPTH
-        */
-
-        else if(depth >= 8){
-
-          color = "#00c853";
-
-          title =
-          "🟢 HIGH BASS POTENTIAL";
-
-          score = 72;
-
-          reason =
-          "Potential staging/ambush depth. Check nearby shallow water and structure.";
-
-        }
-
-
-        /*
-           SHALLOW TRANSITION
-        */
-
-        else {
-
-          color = "#ffd400";
-
-          title =
-          "🟡 SECONDARY POTENTIAL";
-
-          score = 58;
-
-          reason =
-          "Shallow-to-mid depth area that may become important when bass move shallow.";
-
-        }
-
-
-        /*
-           Don't put every polygon on the screen.
-           Only show representative locations.
-        */
-
-        let tooClose = false;
-
-
-        for(
-          const existing
-          of predictionLayer.getLayers()
-        ){
-
-          const existingLatLng =
-          existing.getLatLng();
-
-
-          const distance =
-          map.distance(
-            center,
-            existingLatLng
-          );
-
-
-          if(distance < 250){
-
-            tooClose = true;
-            break;
-
-          }
-
-        }
-
-
-        if(tooClose){
-          continue;
-        }
-
-
-        const marker =
-        L.circleMarker(
-          center,
-          {
-            radius:11,
-            color:"#ffffff",
-            weight:2,
-            fillColor:color,
-            fillOpacity:.90
-          }
-        );
-
-
-        marker.bindPopup(
-
-          "<strong>"+
-          title+
-          "</strong>"+
-
-          "<br><br>"+
-
-          "<strong>Predicted score:</strong> "+
-          score+
-          "/100"+
-
-          "<br>"+
-
-          "<strong>Depth:</strong> "+
-          depth+
-          " feet"+
-
-          "<br><br>"+
-
-          reason+
-
-          "<br><br>"+
-
-          "<em>"+
-          "Calculated fishing area. "+
-          "Not a guaranteed fish location."+
-          "</em>"
-
-        );
-
-
-        predictionLayer.addLayer(marker);
-
-        count++;
-
-
-        /*
-           Limit the number of points so
-           the lake doesn't become a Christmas tree.
-        */
-
-        if(count >= 30){
-          break;
-        }
-
-      }
-
-
-      if(count >= 30){
-        break;
-      }
-
-
-    }
-    catch(error){
-
-      console.log(
-        "Prediction error:",
-        name,
-        error
-      );
-
-    }
-
-  }
-
-
-  /*
-     Make sure the colored prediction dots
-     actually appear on the map.
-  */
-
-  predictionLayer.addTo(map);
-
-
-  return count;
-
-}
-
-
-/* ==============================
-   WIND ARROWS
-============================== */
-
-function drawWind(){
-
-  windLayer.clearLayers();
-
-
-  if(!windOn){
-    return;
-  }
-
-
-  const bounds =
-  map.getBounds();
-
-
-  const north=bounds.getNorth();
-  const south=bounds.getSouth();
-  const east=bounds.getEast();
-  const west=bounds.getWest();
-
-
-  const movingDirection =
-  (windDirection+180)%360;
-
-
-  const rotation =
-  movingDirection-90;
-
-
-  for(let r=0;r<5;r++){
-
-    for(let c=0;c<6;c++){
-
-      const lat =
-      south+
-      (north-south)*(r+.5)/5;
-
-
-      const lon =
-      west+
-      (east-west)*(c+.5)/6;
-
-
-      const icon =
-      L.divIcon({
-        className:"",
-        html:
-        "<div style='"+
-        "font-size:24px;"+
-        "font-weight:bold;"+
-        "color:#ff8c00;"+
-        "text-shadow:1px 1px 2px black;"+
-        "transform:rotate("+
-        rotation+
-        "deg)'>➜</div>",
-        iconSize:[30,30],
-        iconAnchor:[15,15]
-      });
-
-
-      L.marker(
-        [lat,lon],
-        {
-          icon:icon,
-          interactive:false
-        }
-      ).addTo(windLayer);
-
-    }
-
-  }
-
-}
-
-
-/* ==============================
-   SELECT LAKE
-============================== */
-
-async function selectLake(){
-
-  const lakeName =
-  document.getElementById("lake").value;
-
-
-  const lake =
-  lakes[lakeName];
-
-
-  if(!lake){
-    return;
-  }
-
-
-  document.getElementById("lakeName").textContent =
-  lakeName;
-
-
-  document.getElementById("mapStatus").textContent =
-  "Loading map and weather...";
-
-
-  /*
-     FIRST:
-     Put the map on the lake.
-  */
-
-  map.setView(
-    [lake.lat,lake.lon],
-    lake.zoom
-  );
-
-
-  /*
-     SECOND:
-     Load weather independently.
-  */
-
-  loadWeather();
-
-
-  /*
-     THIRD:
-     Load FWC information.
-     Failure here cannot kill the map.
-  */
-
-  const results =
-  await Promise.allSettled([
-
-    loadBottom(lake),
-
-    loadAttractors(lake),
-
-    loadPredictions(lake)
-
-  ]);
-
-
-  const bottom =
-  results[0].status==="fulfilled"
-  ?results[0].value:0;
-
-
-  const attractors =
-  results[1].status==="fulfilled"
-  ?results[1].value:0;
-
-
-  const predictions =
-  results[2].status==="fulfilled"
-  ?results[2].value:0;
-
-
-  document.getElementById("mapStatus").textContent =
-  "Bottom areas: "+
-  bottom+
-  " | Purple FWC attractors: "+
-  attractors+
-  " | Predicted bass areas: "+
-  predictions;
-
-
-  if(bottomOn){
-
-    bottomLayer.addTo(map);
-    predictionLayer.addTo(map);
-
-  }
-
-
-  setTimeout(function(){
-    map.invalidateSize();
-  },300);
-
-}
-
-
-/* ==============================
-   EVENTS
-============================== */
-
-document
-.getElementById("lake")
-.addEventListener(
-"change",
-selectLake
-);
-
-
-document
-.getElementById("refreshWeather")
-.addEventListener(
-"click",
-loadWeather
-);
-
-
-map.on(
-"moveend",
-function(){
-
-  if(windOn){
-    drawWind();
-  }
-
-});
-
-
-/* ==============================
-   START
-============================== */
-
-const firstLake =
-document.getElementById("lake").value;
-
-
-const first =
-lakes[firstLake];
-
-
-map.setView(
-[first.lat,first.lon],
-first.zoom
-);
-
-
-loadWeather();
-
-loadBottom(first)
-.then(function(){
-  if(bottomOn){
-    bottomLayer.addTo(map);
-  }
-})
-.catch(function(error){
-  console.log(error);
-});
-
-
-loadAttractors(first)
-.then(function(){
-  attractorLayer.addTo(map);
-})
-.catch(function(error){
-  console.log(error);
-});
-
-
-loadPredictions(first)
-.then(function(){
-  if(bottomOn){
-    predictionLayer.addTo(map);
-  }
-})
-.catch(function(error){
-  console.log(error);
-});
-
-
-setTimeout(function(){
-  map.invalidateSize();
-},1000);
-
-</script>
-
-</body>
-</html>
+   FWC SERVICES
+==============================
