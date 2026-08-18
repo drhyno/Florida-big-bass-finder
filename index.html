@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <title>Florida Big Bass Finder - Pro Edition</title>
   
   <!-- Leaflet CSS -->
@@ -15,7 +15,7 @@
       padding: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
-    body, html {
+    html, body {
       width: 100%;
       height: 100%;
       overflow: hidden;
@@ -52,54 +52,52 @@
       font-size: 24px;
       cursor: pointer;
       box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-      transition: all 0.2s ease;
-    }
-    .sidebar-toggle:hover {
-      background: #334155;
-      color: #ffffff;
     }
 
-    /* Slide-out Sidebar */
+    /* Slide-out Sidebar with Full Scroll Capability */
     .sidebar {
       position: absolute;
       top: 0;
       left: -360px;
-      width: 350px;
+      width: 340px;
       height: 100%;
       background: #0f172a;
       border-right: 1px solid #1e293b;
       z-index: 1000;
-      transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: left 0.3s ease;
       display: flex;
       flex-direction: column;
       box-shadow: 4px 0 20px rgba(0,0,0,0.6);
-      padding-top: 70px;
     }
     .sidebar.open {
       left: 0;
     }
 
     .sidebar-header {
-      padding: 0 16px 12px 16px;
+      padding: 60px 16px 12px 16px;
       border-bottom: 1px solid #1e293b;
+      flex-shrink: 0;
     }
     .sidebar-header h1 {
-      font-size: 1.25rem;
+      font-size: 1.2rem;
       color: #38bdf8;
     }
     .sidebar-header p {
-      font-size: 0.8rem;
+      font-size: 0.75rem;
       color: #94a3b8;
     }
 
+    /* Scrollable Container Fix */
     .sidebar-content {
-      flex: 1;
+      flex: 1 1 auto;
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
       padding: 16px;
+      padding-bottom: 80px; /* Extra bottom padding so full list is scrollable */
     }
 
     .section-title {
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       text-transform: uppercase;
       letter-spacing: 0.05em;
       color: #64748b;
@@ -110,7 +108,6 @@
       margin-top: 0;
     }
 
-    /* Controls & Selectors */
     select, input {
       width: 100%;
       padding: 10px;
@@ -118,15 +115,12 @@
       border: 1px solid #334155;
       border-radius: 6px;
       color: #f8fafc;
-      font-size: 0.9rem;
+      font-size: 0.85rem;
       outline: none;
       margin-bottom: 12px;
     }
-    select:focus {
-      border-color: #38bdf8;
-    }
 
-    /* Layer Options */
+    /* Checkbox Group Layout */
     .layer-group {
       background: #1e293b;
       border-radius: 6px;
@@ -137,13 +131,19 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 6px 0;
+      padding: 8px 0;
       font-size: 0.85rem;
+      border-bottom: 1px solid #334155;
+    }
+    .layer-item:last-child {
+      border-bottom: none;
     }
     .layer-item input[type="checkbox"] {
-      width: auto;
+      width: 18px;
+      height: 18px;
       margin: 0;
       cursor: pointer;
+      accent-color: #38bdf8;
     }
 
     /* Pro Recommendation Card */
@@ -154,10 +154,7 @@
       padding: 12px;
       font-size: 0.85rem;
       line-height: 1.4;
-    }
-    .recom-card h4 {
-      color: #f8fafc;
-      margin-bottom: 4px;
+      margin-bottom: 12px;
     }
     .tag {
       display: inline-block;
@@ -171,7 +168,7 @@
       font-weight: 600;
     }
 
-    /* Custom Map Tooltips & Overlays */
+    /* Map Popups */
     .leaflet-popup-content-wrapper {
       background: #0f172a;
       color: #f8fafc;
@@ -180,6 +177,16 @@
     }
     .leaflet-popup-tip {
       background: #0f172a;
+    }
+    .popup-badge {
+      display: inline-block;
+      background: #ef4444;
+      color: #ffffff;
+      font-weight: bold;
+      font-size: 0.75rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-bottom: 6px;
     }
     .popup-title {
       font-weight: bold;
@@ -192,22 +199,22 @@
 <body>
 
 <div id="app">
-  <!-- Slide Toggle Button -->
-  <button class="sidebar-toggle" id="toggleBtn" onclick="toggleSidebar()">≡</button>
+  <!-- Toggle Drawer Button -->
+  <button class="sidebar-toggle" onclick="toggleSidebar()">≡</button>
 
-  <!-- Collapsible Drawer Sidebar -->
+  <!-- Slide-Out Sidebar -->
   <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
       <h1>Florida Big Bass Finder</h1>
-      <p>FWC Pro Edition & Bathymetry Maps</p>
+      <p>90/10 High-Probability Spot Engine</p>
     </div>
 
     <div class="sidebar-content">
       <!-- Individual Lakes Selector -->
       <div class="section-title">Select Individual Lake</div>
       <select id="lakeSelect" onchange="focusLake(this.value)">
-        <option value="">-- Choose a Florida Lake --</option>
-        <optgroup label="St. Johns River Chain">
+        <option value="">-- Select a Florida Lake --</option>
+        <optgroup label="St. Johns River System">
           <option value="washington">Lake Washington</option>
           <option value="poinsett">Lake Poinsett</option>
           <option value="winder">Lake Winder</option>
@@ -235,12 +242,12 @@
         </optgroup>
       </select>
 
-      <!-- Water Condition & Temp Controls -->
+      <!-- Water Temp & Season -->
       <div class="section-title">Water Conditions</div>
-      <label style="font-size:0.8rem; color:#94a3b8;">Est. Water Temp (°F)</label>
+      <label style="font-size:0.75rem; color:#94a3b8;">Est. Water Temp (°F)</label>
       <input type="number" id="tempInput" value="74" min="50" max="95" onchange="updateRecommendations()" />
 
-      <label style="font-size:0.8rem; color:#94a3b8;">Season / Month</label>
+      <label style="font-size:0.75rem; color:#94a3b8;">Season / Phase</label>
       <select id="seasonSelect" onchange="updateRecommendations()">
         <option value="spring">Spring / Spawn (65-75°F)</option>
         <option value="summer" selected>Summer / Post-Spawn (78-90°F)</option>
@@ -248,32 +255,34 @@
         <option value="winter">Winter / Cold Fronts (55-65°F)</option>
       </select>
 
-      <!-- Dynamic FWC & Pro Lure Suggestions -->
+      <!-- FWC / Pro Lures & Suggestions -->
       <div class="section-title">FWC & Pro Lure Advice</div>
-      <div class="recom-card" id="recomBox">
-        <!-- Dynamically Populated -->
-      </div>
+      <div class="recom-card" id="recomBox"></div>
 
-      <!-- Map Layer Options -->
-      <div class="section-title">Map Layers</div>
+      <!-- Map Layer Checkboxes -->
+      <div class="section-title">Map Layers & Overlays</div>
       <div class="layer-group">
         <div class="layer-item">
-          <label for="layerSatellite">Satellite Base Map</label>
+          <label for="layerSatellite">Satellite Map</label>
           <input type="checkbox" id="layerSatellite" checked onchange="toggleLayers()" />
         </div>
         <div class="layer-item">
-          <label for="layerContours">Bathymetry / Bottom Contours</label>
+          <label for="layerSpots">90/10 Big Bass Spots (9.2 Ratings)</label>
+          <input type="checkbox" id="layerSpots" checked onchange="toggleLayers()" />
+        </div>
+        <div class="layer-item">
+          <label for="layerContours">Bathymetry / Depth Contours</label>
           <input type="checkbox" id="layerContours" checked onchange="toggleLayers()" />
         </div>
         <div class="layer-item">
-          <label for="layerHotspots">Pro Fishing Spots & Channels</label>
-          <input type="checkbox" id="layerHotspots" checked onchange="toggleLayers()" />
+          <label for="layerLakes">Lake Location Markers</label>
+          <input type="checkbox" id="layerLakes" checked onchange="toggleLayers()" />
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Main Map Container -->
+  <!-- Map -->
   <div id="map"></div>
 </div>
 
@@ -281,13 +290,11 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-  // Toggle Sidebar visibility
   function toggleSidebar() {
-    const sb = document.getElementById('sidebar');
-    sb.classList.toggle('open');
+    document.getElementById('sidebar').classList.toggle('open');
   }
 
-  // Lake Data Dictionary (All individual lakes explicitly mapped out)
+  // All individual Florida lakes explicitly mapped out
   const lakeData = {
     washington: { name: "Lake Washington", lat: 28.1439, lng: -80.7425, zoom: 14, depth: "3 - 12 ft", notes: "St. Johns River headwaters lake. Known for thick hydrilla lines and river channel drop-offs." },
     poinsett: { name: "Lake Poinsett", lat: 28.3492, lng: -80.8328, zoom: 13, depth: "4 - 10 ft", notes: "Heavy lily pad cover and shell beds near the main channel entrance." },
@@ -309,44 +316,81 @@
     tarpon: { name: "Lake Tarpon", lat: 28.1000, lng: -82.7167, zoom: 13, depth: "8 - 14 ft", notes: "Pinellas County gem with deep weed lines and sinkhole formations." }
   };
 
-  // Initialize Map Variables
+  // High Probability 90/10 Bass Spots (Featuring 9.2, 9.5, etc. Ratings)
+  const highProbabilitySpots = [
+    {
+      name: "Lake Washington - Main River Drop-Off",
+      rating: "9.2 Rating (90/10 Zone)",
+      lat: 28.1465,
+      lng: -80.7410,
+      type: "Depth Transition & Hydrilla Edge",
+      advice: "90% of trophy bass hold in this 10% corridor. Depth drops from 4ft to 11ft along the old river channel. Pitch Junebug worms along the outer grass wall."
+    },
+    {
+      name: "Lake Washington - North Weir Channel",
+      rating: "9.4 Rating (90/10 Zone)",
+      lat: 28.1580,
+      lng: -80.7480,
+      type: "Current Funnel & Shell Bed",
+      advice: "Water flow creates a feeding funnel. Work lipless crankbaits or chatterbaits across the hard bottom shell bar."
+    },
+    {
+      name: "Lake Toho - Goblet Cove Point",
+      rating: "9.2 Rating (90/10 Zone)",
+      lat: 28.2110,
+      lng: -81.3720,
+      type: "Hydrilla Point & Windward Edge",
+      advice: "Wind forces baitfish into this outer point. Slow-roll a white spinnerbait or slow-pitch a live shiner."
+    },
+    {
+      name: "Lake Kissimmee - Brahma Island South Point",
+      rating: "9.6 Rating (90/10 Zone)",
+      lat: 27.8920,
+      lng: -81.2710,
+      type: "Submerged Eelgrass & Shell Hump",
+      advice: "Prime pre-spawn and summer staging spot. Heavy 10-inch Texas-rigged worms produce 8lb+ bass here."
+    },
+    {
+      name: "Lake Harris - Deep Spring Hole",
+      rating: "9.1 Rating (90/10 Zone)",
+      lat: 28.7680,
+      lng: -81.8310,
+      type: "Deep Thermal Hole (18ft)",
+      advice: "Key thermal sanctuary during extreme summer heat or winter cold fronts. Drop-shot or Carolina rig slow on the edge."
+    }
+  ];
+
   let map;
-  let satLayer, osmLayer, contourLayer, hotspotGroup;
+  let satLayer, contourLayer, lakeMarkersGroup, spotMarkersGroup;
 
   function initMap() {
-    // Center initially near Lake Washington
     map = L.map('map', { zoomControl: false }).setView([28.1439, -80.7425], 13);
     L.control.zoom({ position: 'topright' }).addTo(map);
 
-    // Base Imagery Layers
+    // Satellite Imagery
     satLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
       attribution: 'Esri Satellite'
     }).addTo(map);
 
-    osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: 'OpenStreetMap'
-    });
-
-    // Bathymetry / Depth Contours Tile Overlay (OpenSeaMap depth contour layer)
+    // Bathymetry / Depth Layer
     contourLayer = L.tileLayer('https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png', {
-      attribution: 'OpenSeaMap Bathymetry Data'
+      attribution: 'OpenSeaMap Depth Data'
     }).addTo(map);
 
-    hotspotGroup = L.layerGroup().addTo(map);
+    lakeMarkersGroup = L.layerGroup().addTo(map);
+    spotMarkersGroup = L.layerGroup().addTo(map);
 
-    // Populate Initial Markers for Lake Washington & major points
-    plotLakeMarkers();
+    plotLakesAndSpots();
     updateRecommendations();
   }
 
-  // Plot interactive hotspot markers across Florida lakes
-  function plotLakeMarkers() {
-    hotspotGroup.clearLayers();
+  function plotLakesAndSpots() {
+    lakeMarkersGroup.clearLayers();
+    spotMarkersGroup.clearLayers();
 
+    // 1. Plot Main Lakes
     Object.keys(lakeData).forEach(key => {
       const lake = lakeData[key];
-      
-      // Lake Center Marker
       const marker = L.circleMarker([lake.lat, lake.lng], {
         radius: 8,
         color: '#38bdf8',
@@ -361,65 +405,71 @@
         <button style="margin-top:8px; padding:4px 8px; background:#0284c7; color:#fff; border:none; border-radius:4px; cursor:pointer;" onclick="focusLake('${key}')">Focus Lake</button>
       `);
 
-      hotspotGroup.addLayer(marker);
+      lakeMarkersGroup.addLayer(marker);
+    });
 
-      // Add simulated depth contour rings for visual bottom structure
-      L.circle([lake.lat, lake.lng], {
-        radius: 1200,
-        color: '#0284c7',
-        weight: 1,
-        dashArray: '4, 4',
-        fill: false
-      }).addTo(hotspotGroup);
+    // 2. Plot 90/10 Big Bass Spots (Red Pulse Rings + Detailed Tap Popups)
+    highProbabilitySpots.forEach(spot => {
+      // Red Spot Marker
+      const spotMarker = L.circleMarker([spot.lat, spot.lng], {
+        radius: 9,
+        color: '#ffffff',
+        weight: 2,
+        fillColor: '#ef4444',
+        fillOpacity: 0.95
+      });
 
-      L.circle([lake.lat, lake.lng], {
-        radius: 600,
-        color: '#38bdf8',
+      // Outer 90/10 Visual Target Ring
+      const targetRing = L.circle([spot.lat, spot.lng], {
+        radius: 350,
+        color: '#ef4444',
         weight: 1.5,
-        dashArray: '2, 2',
-        fill: false
-      }).addTo(hotspotGroup);
+        dashArray: '4, 4',
+        fill: true,
+        fillColor: '#ef4444',
+        fillOpacity: 0.15
+      });
+
+      spotMarker.bindPopup(`
+        <span class="popup-badge">${spot.rating}</span>
+        <div class="popup-title">${spot.name}</div>
+        <p><strong>Structure:</strong> ${spot.type}</p>
+        <p style="margin-top:6px;"><strong>Pro Analysis:</strong> ${spot.advice}</p>
+      `);
+
+      spotMarkersGroup.addLayer(spotMarker);
+      spotMarkersGroup.addLayer(targetRing);
     });
   }
 
-  // Focus Map on Selected Lake
   function focusLake(key) {
     if (!key || !lakeData[key]) return;
     const lake = lakeData[key];
-    map.flyTo([lake.lat, lake.lng], lake.zoom, { duration: 1.5 });
-
-    // Synchronize select dropdown if tapped from map marker
+    map.flyTo([lake.lat, lake.lng], lake.zoom, { duration: 1.2 });
     document.getElementById('lakeSelect').value = key;
   }
 
-  // Layer Visibility Toggle
   function toggleLayers() {
     const sat = document.getElementById('layerSatellite').checked;
+    const spots = document.getElementById('layerSpots').checked;
     const contours = document.getElementById('layerContours').checked;
-    const hotspots = document.getElementById('layerHotspots').checked;
+    const lakes = document.getElementById('layerLakes').checked;
 
-    if (sat) {
-      if (!map.hasLayer(satLayer)) map.addLayer(satLayer);
-    } else {
-      if (map.hasLayer(satLayer)) map.removeLayer(satLayer);
-    }
+    if (sat) { if (!map.hasLayer(satLayer)) map.addLayer(satLayer); }
+    else { if (map.hasLayer(satLayer)) map.removeLayer(satLayer); }
 
-    if (contours) {
-      if (!map.hasLayer(contourLayer)) map.addLayer(contourLayer);
-    } else {
-      if (map.hasLayer(contourLayer)) map.removeLayer(contourLayer);
-    }
+    if (spots) { if (!map.hasLayer(spotMarkersGroup)) map.addLayer(spotMarkersGroup); }
+    else { if (map.hasLayer(spotMarkersGroup)) map.removeLayer(spotMarkersGroup); }
 
-    if (hotspots) {
-      if (!map.hasLayer(hotspotGroup)) map.addLayer(hotspotGroup);
-    } else {
-      if (map.hasLayer(hotspotGroup)) map.removeLayer(hotspotGroup);
-    }
+    if (contours) { if (!map.hasLayer(contourLayer)) map.addLayer(contourLayer); }
+    else { if (map.hasLayer(contourLayer)) map.removeLayer(contourLayer); }
+
+    if (lakes) { if (!map.hasLayer(lakeMarkersGroup)) map.addLayer(lakeMarkersGroup); }
+    else { if (map.hasLayer(lakeMarkersGroup)) map.removeLayer(lakeMarkersGroup); }
   }
 
-  // FWC & Pro Bassmaster Lure Engine
   function updateRecommendations() {
-    const temp = parseInt(document.getElementById('tempInput').value) || 72;
+    const temp = parseInt(document.getElementById('tempInput').value) || 74;
     const season = document.getElementById('seasonSelect').value;
     const recomBox = document.getElementById('recomBox');
 
@@ -456,16 +506,15 @@
     let baitsList = baits.map(b => `<li>${b}</li>`).join('');
 
     recomBox.innerHTML = `
-      <h4>${title} (${temp}°F)</h4>
-      <p style="margin: 6px 0;"><strong>Recommended Lure Colors:</strong></p>
+      <h4 style="color:#f8fafc; font-size:0.9rem;">${title} (${temp}°F)</h4>
+      <p style="margin: 6px 0 2px 0;"><strong>Lure Colors:</strong></p>
       <div>${tagsHtml}</div>
-      <p style="margin: 8px 0 4px 0;"><strong>Top Bait Options:</strong></p>
-      <ul style="padding-left: 18px; margin-bottom: 8px;">${baitsList}</ul>
-      <p style="color: #94a3b8; font-size:0.8rem;"><em>Pro Tip: ${tactics}</em></p>
+      <p style="margin: 8px 0 2px 0;"><strong>Top Baits:</strong></p>
+      <ul style="padding-left: 18px; margin-bottom: 6px;">${baitsList}</ul>
+      <p style="color: #94a3b8; font-size:0.75rem;"><em>Pro Tip: ${tactics}</em></p>
     `;
   }
 
-  // Initialize on page load
   window.onload = initMap;
 </script>
 
