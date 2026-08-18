@@ -1,528 +1,473 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Florida Freshwater Smart Fishing Map | Salt Strong Style</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Florida Big Bass Finder - Pro Edition</title>
+  
+  <!-- Leaflet CSS -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
-
+  
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body, html { width: 100%; height: 100%; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #080d1a; color: #fff; overflow: hidden; }
-    #map { width: 100%; height: 100%; position: absolute; z-index: 1; }
-
-    .top-telemetry-bar {
-      position: absolute; top: 12px; left: 12px; right: 12px; height: 54px;
-      background: rgba(10, 16, 30, 0.92); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(56, 189, 248, 0.25); border-radius: 12px; z-index: 1000;
-      display: flex; align-items: center; justify-content: space-between; padding: 0 16px;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
-    .telemetry-item { display: flex; flex-direction: column; }
-    .telemetry-label { font-size: 0.62rem; text-transform: uppercase; color: #64748b; font-weight: 800; letter-spacing: 0.5px; }
-    .telemetry-val { font-size: 0.95rem; font-weight: 800; color: #38bdf8; display: flex; align-items: center; gap: 4px; }
-    .val-highlight { color: #22c55e; }
-
-    .side-panel {
-      position: absolute; top: 78px; left: 12px; width: 320px; max-width: calc(100vw - 24px);
-      max-height: calc(100vh - 96px); background: rgba(10, 16, 30, 0.92);
-      backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 14px; padding: 16px; z-index: 1000;
-      overflow-y: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+    body, html {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background: #121212;
+      color: #e0e0e0;
     }
-
-    .search-box { margin-bottom: 12px; }
-    .search-box input {
-      width: 100%; background: #1e293b; border: 1px solid #334155; color: #fff;
-      padding: 10px 12px; border-radius: 8px; font-size: 0.85rem; outline: none;
+    #app {
+      display: flex;
+      width: 100vw;
+      height: 100vh;
+      position: relative;
     }
-    .search-box input:focus { border-color: #38bdf8; }
-
-    .lake-select {
-      width: 100%; background: #1e293b; border: 1px solid #334155; color: #fff;
-      padding: 10px; border-radius: 8px; font-weight: 700; font-size: 0.88rem;
-      outline: none; margin-bottom: 14px; cursor: pointer;
+    #map {
+      width: 100%;
+      height: 100%;
+      z-index: 1;
     }
 
-    .score-card {
-      background: linear-gradient(135deg, rgba(14, 165, 233, 0.15), rgba(3, 105, 161, 0.35));
-      border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 10px; padding: 12px;
-      margin-bottom: 14px; display: flex; justify-content: space-between; align-items: center;
+    /* Toggle Button for Sidebar */
+    .sidebar-toggle {
+      position: absolute;
+      top: 15px;
+      left: 15px;
+      z-index: 1001;
+      background: #1e293b;
+      color: #38bdf8;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+      transition: all 0.2s ease;
     }
-    .score-big { font-size: 2.2rem; font-weight: 900; color: #38bdf8; line-height: 1; }
-    .score-sub { font-size: 0.75rem; color: #4ade80; font-weight: 700; margin-top: 4px; text-transform: uppercase; }
-
-    .slider-box { margin-bottom: 14px; }
-    .slider-labels { display: flex; justify-content: space-between; font-size: 0.7rem; font-weight: 700; color: #94a3b8; margin-bottom: 6px; }
-    input[type=range] { width: 100%; accent-color: #0ea5e9; cursor: pointer; }
-
-    .section-label { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 0.5px; color: #64748b; font-weight: 800; margin: 12px 0 6px; }
-
-    .layer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-    .layer-btn {
-      background: #1e293b; border: 1px solid #334155; color: #94a3b8; padding: 8px;
-      border-radius: 6px; font-size: 0.7rem; font-weight: 700; cursor: pointer;
-      display: flex; align-items: center; gap: 6px; transition: all 0.2s ease;
-    }
-    .layer-btn.active { background: rgba(14, 165, 233, 0.25); border-color: #0ea5e9; color: #38bdf8; }
-    .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-
-    .depth-legend { display: flex; flex-direction: column; gap: 4px; margin-top: 8px; font-size: 0.68rem; color: #94a3b8; }
-    .depth-legend-row { display: flex; align-items: center; gap: 6px; }
-    .depth-swatch { width: 18px; height: 4px; border-radius: 2px; flex-shrink: 0; }
-    .disclaimer { font-size: 0.62rem; color: #64748b; margin-top: 10px; line-height: 1.4; font-style: italic; }
-
-    .leaflet-popup-content-wrapper { background: #0f172a; color: #fff; border: 1px solid #38bdf8; border-radius: 10px; }
-    .leaflet-popup-tip { background: #0f172a; }
-    .popup-title { color: #38bdf8; font-weight: 800; font-size: 0.95rem; margin-bottom: 4px; }
-    .popup-badge { background: #0284c7; color: #fff; font-size: 0.65rem; padding: 2px 6px; border-radius: 4px; font-weight: 800; }
-    .popup-badge.gold { background: #a16207; }
-    .popup-detail { font-size: 0.78rem; line-height: 1.35; margin-top: 6px; color: #cbd5e1; }
-    .popup-lure { margin-top: 8px; padding-top: 6px; border-top: 1px solid #334155; font-size: 0.75rem; color: #f59e0b; font-weight: 700; }
-
-    .load-error {
-      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 2000;
-      background: #1e293b; border: 1px solid #ef4444; color: #fca5a5; padding: 16px 20px;
-      border-radius: 10px; font-size: 0.85rem; max-width: 320px; text-align: center; display: none;
+    .sidebar-toggle:hover {
+      background: #334155;
+      color: #ffffff;
     }
 
-    @media (max-width: 600px) {
-      .top-telemetry-bar { font-size: 0.75rem; padding: 0 8px; }
-      .telemetry-item:nth-child(3) { display: none; }
+    /* Slide-out Sidebar */
+    .sidebar {
+      position: absolute;
+      top: 0;
+      left: -360px;
+      width: 350px;
+      height: 100%;
+      background: #0f172a;
+      border-right: 1px solid #1e293b;
+      z-index: 1000;
+      transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 4px 0 20px rgba(0,0,0,0.6);
+      padding-top: 70px;
+    }
+    .sidebar.open {
+      left: 0;
+    }
+
+    .sidebar-header {
+      padding: 0 16px 12px 16px;
+      border-bottom: 1px solid #1e293b;
+    }
+    .sidebar-header h1 {
+      font-size: 1.25rem;
+      color: #38bdf8;
+    }
+    .sidebar-header p {
+      font-size: 0.8rem;
+      color: #94a3b8;
+    }
+
+    .sidebar-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+    }
+
+    .section-title {
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #64748b;
+      margin: 16px 0 8px 0;
+      font-weight: 700;
+    }
+    .section-title:first-of-type {
+      margin-top: 0;
+    }
+
+    /* Controls & Selectors */
+    select, input {
+      width: 100%;
+      padding: 10px;
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      color: #f8fafc;
+      font-size: 0.9rem;
+      outline: none;
+      margin-bottom: 12px;
+    }
+    select:focus {
+      border-color: #38bdf8;
+    }
+
+    /* Layer Options */
+    .layer-group {
+      background: #1e293b;
+      border-radius: 6px;
+      padding: 8px 12px;
+      margin-bottom: 12px;
+    }
+    .layer-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 6px 0;
+      font-size: 0.85rem;
+    }
+    .layer-item input[type="checkbox"] {
+      width: auto;
+      margin: 0;
+      cursor: pointer;
+    }
+
+    /* Pro Recommendation Card */
+    .recom-card {
+      background: #1e293b;
+      border-left: 4px solid #38bdf8;
+      border-radius: 6px;
+      padding: 12px;
+      font-size: 0.85rem;
+      line-height: 1.4;
+    }
+    .recom-card h4 {
+      color: #f8fafc;
+      margin-bottom: 4px;
+    }
+    .tag {
+      display: inline-block;
+      background: #0369a1;
+      color: #e0f2fe;
+      font-size: 0.7rem;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-right: 4px;
+      margin-top: 4px;
+      font-weight: 600;
+    }
+
+    /* Custom Map Tooltips & Overlays */
+    .leaflet-popup-content-wrapper {
+      background: #0f172a;
+      color: #f8fafc;
+      border: 1px solid #334155;
+      border-radius: 8px;
+    }
+    .leaflet-popup-tip {
+      background: #0f172a;
+    }
+    .popup-title {
+      font-weight: bold;
+      color: #38bdf8;
+      font-size: 1rem;
+      margin-bottom: 4px;
     }
   </style>
 </head>
 <body>
 
-<div class="top-telemetry-bar">
-  <div class="telemetry-item">
-    <span class="telemetry-label">Target Species</span>
-    <span class="telemetry-val">FL Trophy Bass</span>
+<div id="app">
+  <!-- Slide Toggle Button -->
+  <button class="sidebar-toggle" id="toggleBtn" onclick="toggleSidebar()">≡</button>
+
+  <!-- Collapsible Drawer Sidebar -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <h1>Florida Big Bass Finder</h1>
+      <p>FWC Pro Edition & Bathymetry Maps</p>
+    </div>
+
+    <div class="sidebar-content">
+      <!-- Individual Lakes Selector -->
+      <div class="section-title">Select Individual Lake</div>
+      <select id="lakeSelect" onchange="focusLake(this.value)">
+        <option value="">-- Choose a Florida Lake --</option>
+        <optgroup label="St. Johns River Chain">
+          <option value="washington">Lake Washington</option>
+          <option value="poinsett">Lake Poinsett</option>
+          <option value="winder">Lake Winder</option>
+          <option value="monroe">Lake Monroe</option>
+          <option value="george">Lake George</option>
+        </optgroup>
+        <optgroup label="Kissimmee Chain">
+          <option value="tohopekaliga">Lake Tohopekaliga (Toho)</option>
+          <option value="eastoho">East Lake Tohopekaliga</option>
+          <option value="cypress">Lake Cypress</option>
+          <option value="hatchineha">Lake Hatchineha</option>
+          <option value="kissimmee">Lake Kissimmee</option>
+        </optgroup>
+        <optgroup label="Harris Chain">
+          <option value="harris">Lake Harris</option>
+          <option value="eustis">Lake Eustis</option>
+          <option value="griffin">Lake Griffin</option>
+          <option value="dora">Lake Dora</option>
+        </optgroup>
+        <optgroup label="Central & South Florida">
+          <option value="okeechobee">Lake Okeechobee</option>
+          <option value="istokpoga">Lake Istokpoga</option>
+          <option value="arbuckle">Lake Arbuckle</option>
+          <option value="tarpon">Lake Tarpon</option>
+        </optgroup>
+      </select>
+
+      <!-- Water Condition & Temp Controls -->
+      <div class="section-title">Water Conditions</div>
+      <label style="font-size:0.8rem; color:#94a3b8;">Est. Water Temp (°F)</label>
+      <input type="number" id="tempInput" value="74" min="50" max="95" onchange="updateRecommendations()" />
+
+      <label style="font-size:0.8rem; color:#94a3b8;">Season / Month</label>
+      <select id="seasonSelect" onchange="updateRecommendations()">
+        <option value="spring">Spring / Spawn (65-75°F)</option>
+        <option value="summer" selected>Summer / Post-Spawn (78-90°F)</option>
+        <option value="fall">Fall / Feeding (68-78°F)</option>
+        <option value="winter">Winter / Cold Fronts (55-65°F)</option>
+      </select>
+
+      <!-- Dynamic FWC & Pro Lure Suggestions -->
+      <div class="section-title">FWC & Pro Lure Advice</div>
+      <div class="recom-card" id="recomBox">
+        <!-- Dynamically Populated -->
+      </div>
+
+      <!-- Map Layer Options -->
+      <div class="section-title">Map Layers</div>
+      <div class="layer-group">
+        <div class="layer-item">
+          <label for="layerSatellite">Satellite Base Map</label>
+          <input type="checkbox" id="layerSatellite" checked onchange="toggleLayers()" />
+        </div>
+        <div class="layer-item">
+          <label for="layerContours">Bathymetry / Bottom Contours</label>
+          <input type="checkbox" id="layerContours" checked onchange="toggleLayers()" />
+        </div>
+        <div class="layer-item">
+          <label for="layerHotspots">Pro Fishing Spots & Channels</label>
+          <input type="checkbox" id="layerHotspots" checked onchange="toggleLayers()" />
+        </div>
+      </div>
+    </div>
   </div>
-  <div class="telemetry-item">
-    <span class="telemetry-label">Solunar Bite Index</span>
-    <span class="telemetry-val val-highlight" id="solunar-val">88% (PEAK)</span>
-  </div>
-  <div class="telemetry-item">
-    <span class="telemetry-label">Wind / Drift Vector</span>
-    <span class="telemetry-val" id="wind-val">12 mph East</span>
-  </div>
-  <div class="telemetry-item">
-    <span class="telemetry-label">Barometer</span>
-    <span class="telemetry-val">30.12 inHg &#9650;</span>
-  </div>
+
+  <!-- Main Map Container -->
+  <div id="map"></div>
 </div>
 
-<div id="map"></div>
-<div class="load-error" id="load-error">Map library failed to load. Check your internet connection and reload the page.</div>
-
-<div class="side-panel">
-  <div class="search-box">
-    <input type="text" id="search-input" placeholder="Search Florida Lake or Chain..." onkeyup="filterLakes()">
-  </div>
-
-  <select class="lake-select" id="lake-dropdown" onchange="selectLake(this.value)"></select>
-
-  <div class="score-card">
-    <div>
-      <div style="font-size:0.65rem; text-transform:uppercase; letter-spacing:1px; color:#94a3b8; font-weight:700;">Smart Bite Rating</div>
-      <div class="score-big" id="score-num">9.2</div>
-      <div class="score-sub" id="score-status">Windward Feeding Active</div>
-    </div>
-    <div style="text-align:right;">
-      <span style="background:#22c55e; color:#000; font-size:0.65rem; font-weight:900; padding:4px 8px; border-radius:6px;">90/10 RULE</span>
-    </div>
-  </div>
-
-  <div class="slider-box">
-    <div class="slider-labels">
-      <span>Solunar Time Scrub</span>
-      <span style="color:#f59e0b;" id="time-readout">07:00 AM</span>
-    </div>
-    <input type="range" id="time-slider" min="5" max="19" value="7" step="1" oninput="onTimeChange(this.value)">
-  </div>
-
-  <div class="section-label">Map Layers</div>
-  <div class="layer-grid">
-    <button class="layer-btn active" id="btn-heat" onclick="toggleLayer('heat')">
-      <span class="dot" style="background:#ef4444;"></span> 90/10 Heatmap
-    </button>
-    <button class="layer-btn active" id="btn-grass" onclick="toggleLayer('grass')">
-      <span class="dot" style="background:#22c55e;"></span> Hydrilla / Mats
-    </button>
-    <button class="layer-btn active" id="btn-depth" onclick="toggleLayer('depth')">
-      <span class="dot" style="background:#38bdf8;"></span> Bottom Map
-    </button>
-    <button class="layer-btn active" id="btn-spots" onclick="toggleLayer('spots')">
-      <span class="dot" style="background:#f59e0b;"></span> Smart Spots
-    </button>
-    <button class="layer-btn active" id="btn-bigbass" onclick="toggleLayer('bigbass')" style="grid-column: span 2;">
-      <span class="dot" style="background:#eab308;"></span> Big Bass Potential Zones
-    </button>
-  </div>
-
-  <div class="depth-legend">
-    <div class="depth-legend-row"><span class="depth-swatch" style="background:#7dd3fc;"></span> Shallow flat (2&ndash;5 ft)</div>
-    <div class="depth-legend-row"><span class="depth-swatch" style="background:#0ea5e9;"></span> Mid drop (5&ndash;10 ft)</div>
-    <div class="depth-legend-row"><span class="depth-swatch" style="background:#075985;"></span> Deep channel (10 ft+)</div>
-  </div>
-  <div class="disclaimer">Bottom map shows approximate, stylized relative-depth bands for orientation, not a surveyed hydrographic chart. Big Bass Zones highlight likely trophy-holding structure (current breaks, vegetation edges, spawning flats) based on lake characteristics &mdash; verify with sonar/side-scan on the water.</div>
-</div>
+<!-- Leaflet JS -->
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
-(function () {
-
-  if (typeof L === 'undefined' || typeof L.heatLayer === 'undefined') {
-    document.getElementById('load-error').style.display = 'block';
-    return;
+  // Toggle Sidebar visibility
+  function toggleSidebar() {
+    const sb = document.getElementById('sidebar');
+    sb.classList.toggle('open');
   }
 
-  const floridaWaterbodies = {
-    "harris_chain": {
-      name: "Harris Chain - Lake Harris & Eustis",
-      center: [28.800, -81.830], zoom: 12,
-      spots: [
-        { lat: 28.812, lng: -81.845, title: "Dead River Mouth Drop-off", rating: "9.5", lure: "Junebug Speed Worm / 1/2oz Jig", desc: "Current intersection connecting Harris and Eustis. High-volume bait movement." },
-        { lat: 28.840, lng: -81.790, title: "Eustis North Shell Bar", rating: "9.1", lure: "Lipless Crankbait / Deep Diving Plug", desc: "Hard bottom shell hump adjacent to 14ft depth channel contour." }
-      ],
-      grass: [[28.815, -81.850], [28.825, -81.835], [28.810, -81.820]],
-      depths: [
-        { coords: [[28.818,-81.848],[28.826,-81.833],[28.812,-81.822]], depth: "3-5 ft", color: "#7dd3fc" },
-        { coords: [[28.845, -81.800], [28.835, -81.780], [28.820, -81.770]], depth: "12-16 ft channel", color: "#075985" }
-      ],
-      bigBassZones: [
-        { coords: [[28.808,-81.850],[28.818,-81.842],[28.816,-81.828],[28.804,-81.834]], label: "Dead River Confluence Zone", reason: "Current-swept convergence of Harris and Eustis funnels bait past staging cover &mdash; classic ambush point for kicker fish." }
-      ],
-      heatmap: [[28.812, -81.845, 1.0], [28.840, -81.790, 0.85], [28.820, -81.830, 0.7]]
-    },
-    "griffin": {
-      name: "Harris Chain - Lake Griffin",
-      center: [28.880, -81.890], zoom: 12,
-      spots: [
-        { lat: 28.895, lng: -81.905, title: "Haines Creek Mouth Ledge", rating: "9.4", lure: "Black/Blue Punching Jig", desc: "Heavy flow intersection into thick hydrilla coverage." }
-      ],
-      grass: [[28.890, -81.910], [28.885, -81.895]],
-      depths: [
-        { coords: [[28.892,-81.908],[28.887,-81.898]], depth: "3-5 ft", color: "#7dd3fc" },
-        { coords: [[28.895, -81.900], [28.875, -81.880]], depth: "10-13 ft channel", color: "#075985" }
-      ],
-      bigBassZones: [
-        { coords: [[28.898,-81.910],[28.902,-81.900],[28.893,-81.895],[28.888,-81.905]], label: "Haines Creek Punch Zone", reason: "Thick canopy mat over creek flow &mdash; classic heavy-cover trophy holding water." }
-      ],
-      heatmap: [[28.895, -81.905, 0.95]]
-    },
-    "dora": {
-      name: "Harris Chain - Lake Dora & Beauclair",
-      center: [28.795, -81.670], zoom: 13,
-      spots: [
-        { lat: 28.790, lng: -81.655, title: "Dora Canal Entrance Point", rating: "9.2", lure: "White ChatterBait", desc: "Current funnel staging area with scattered Kissimmee grass." }
-      ],
-      grass: [[28.792, -81.660], [28.788, -81.650]],
-      depths: [
-        { coords: [[28.793,-81.663],[28.789,-81.653]], depth: "2-4 ft", color: "#7dd3fc" },
-        { coords: [[28.795, -81.665], [28.785, -81.645]], depth: "9-11 ft channel", color: "#075985" }
-      ],
-      bigBassZones: [
-        { coords: [[28.788,-81.658],[28.793,-81.652],[28.786,-81.648],[28.782,-81.654]], label: "Dora Canal Staging Flat", reason: "Narrow canal choke point concentrates baitfish and staging bass between the two lakes." }
-      ],
-      heatmap: [[28.790, -81.655, 0.9]]
-    },
-    "lake_george": {
-      name: "St. Johns River - Lake George",
-      center: [29.230, -81.600], zoom: 11,
-      spots: [
-        { lat: 29.260, lng: -81.540, title: "Salt Springs Run Mouth", rating: "9.7", lure: "White ChatterBait / Live Shiner", desc: "Spring flow creates prime temperature threshold. Monster bass staging spot." },
-        { lat: 29.180, lng: -81.630, title: "Drayton Island South Ledge", rating: "8.8", lure: "Carolina Rigged Brush Hog", desc: "Current-swept submerged timber and eelgrass points." }
-      ],
-      grass: [[29.265, -81.550], [29.250, -81.530], [29.230, -81.540]],
-      depths: [
-        { coords: [[29.262,-81.545],[29.248,-81.535]], depth: "3-6 ft", color: "#7dd3fc" },
-        { coords: [[29.200, -81.640], [29.170, -81.620]], depth: "14-18 ft channel", color: "#075985" }
-      ],
-      bigBassZones: [
-        { coords: [[29.255,-81.548],[29.263,-81.538],[29.256,-81.530],[29.246,-81.536]], label: "Salt Springs Thermal Refuge", reason: "Constant-temperature spring discharge holds big females year-round, especially in winter cold fronts." }
-      ],
-      heatmap: [[29.260, -81.540, 1.0], [29.180, -81.630, 0.8]]
-    },
-    "rodman": {
-      name: "St. Johns River - Rodman Reservoir",
-      center: [29.500, -81.800], zoom: 12,
-      spots: [
-        { lat: 29.505, lng: -81.815, title: "Ocklawaha River Submerged Channel", rating: "9.8", lure: "Punching 1.5oz Flipping Weight", desc: "Deep timber channel edge. World-class trophy bass sanctuary." }
-      ],
-      grass: [[29.510, -81.820], [29.500, -81.800], [29.490, -81.815]],
-      depths: [
-        { coords: [[29.512,-81.822],[29.498,-81.802]], depth: "3-5 ft", color: "#7dd3fc" },
-        { coords: [[29.515, -81.830], [29.495, -81.790]], depth: "15-20 ft channel", color: "#075985" }
-      ],
-      bigBassZones: [
-        { coords: [[29.508,-81.825],[29.513,-81.815],[29.503,-81.805],[29.497,-81.812]], label: "Standing Timber Sanctuary", reason: "Flooded-forest structure over the old river channel &mdash; one of Florida's premier trophy-bass reservoirs." }
-      ],
-      heatmap: [[29.505, -81.815, 1.0]]
-    },
-    "lake_monroe": {
-      name: "St. Johns River - Lake Monroe (Sanford)",
-      center: [28.835, -81.240], zoom: 13,
-      spots: [
-        { lat: 28.845, lng: -81.260, title: "River Entry Bend (Sanford)", rating: "8.9", lure: "Squarebill Crankbait", desc: "River flow pushes shad directly against outer shell bar." }
-      ],
-      grass: [[28.840, -81.270], [28.850, -81.250], [28.835, -81.260]],
-      depths: [
-        { coords: [[28.842,-81.268],[28.837,-81.258]], depth: "3-5 ft", color: "#7dd3fc" },
-        { coords: [[28.845, -81.265], [28.825, -81.230]], depth: "10-12 ft channel", color: "#075985" }
-      ],
-      bigBassZones: [
-        { coords: [[28.843,-81.272],[28.850,-81.262],[28.844,-81.253],[28.837,-81.262]], label: "River Bend Ambush Flat", reason: "Current bending around the shell bar stacks shad against structure right at the river entry." }
-      ],
-      heatmap: [[28.845, -81.260, 0.9]]
-    },
-    "lake_toho": {
-      name: "Kissimmee Chain - Lake Tohopekaliga (Toho)",
-      center: [28.200, -81.350], zoom: 12,
-      spots: [
-        { lat: 28.205, lng: -81.355, title: "North Steer Beach Point", rating: "9.6", lure: "Black/Blue Soft Jerkbait", desc: "Windward Kissimmee grass line holding heavy shad schools." },
-        { lat: 28.185, lng: -81.335, title: "Goblet Cove Ledge", rating: "9.0", lure: "Lipless Red Eye Shad", desc: "3ft to 8ft bathymetry slope. Ideal morning feeding shelf." }
-      ],
-      grass: [[28.208, -81.360], [28.202, -81.350], [28.195, -81.358]],
-      depths: [
-        { coords: [[28.207,-81.358],[28.198,-81.352]], depth: "2-4 ft", color: "#7dd3fc" },
-        { coords: [[28.210, -81.340], [28.190, -81.330]], depth: "8-10 ft", color: "#0ea5e9" }
-      ],
-      bigBassZones: [
-        { coords: [[28.202,-81.362],[28.209,-81.356],[28.204,-81.348],[28.197,-81.354]], label: "Steer Beach Grass Line Zone", reason: "Toho's famed windward grass edge &mdash; a perennial big-bass tournament zone, especially pre-spawn." }
-      ],
-      heatmap: [[28.205, -81.355, 1.0], [28.185, -81.335, 0.85]]
-    },
-    "lake_kissimmee": {
-      name: "Kissimmee Chain - Lake Kissimmee",
-      center: [27.950, -81.250], zoom: 12,
-      spots: [
-        { lat: 27.965, lng: -81.270, title: "Brahma Island North Point", rating: "9.7", lure: "Topwater Frog / Live Shiner", desc: "Extensive pads and outer reed point pushed by current." }
-      ],
-      grass: [[27.970, -81.280], [27.960, -81.265]],
-      depths: [
-        { coords: [[27.972,-81.283],[27.962,-81.268]], depth: "2-4 ft", color: "#7dd3fc" },
-        { coords: [[27.975, -81.275], [27.955, -81.255]], depth: "7-9 ft", color: "#0ea5e9" }
-      ],
-      bigBassZones: [
-        { coords: [[27.968,-81.283],[27.973,-81.273],[27.964,-81.266],[27.958,-81.274]], label: "Brahma Island Reed Point Zone", reason: "Outer reed point with wind-driven current &mdash; a historic trophy-bass tournament producer." }
-      ],
-      heatmap: [[27.965, -81.270, 0.98]]
-    },
-    "okeechobee": {
-      name: "Lake Okeechobee (North & Shoal)",
-      center: [27.150, -80.850], zoom: 11,
-      spots: [
-        { lat: 27.155, lng: -80.840, title: "Observation Shoal Edge", rating: "9.7", lure: "Hollow Body Frog / Swim Jig", desc: "Outer eelgrass and bulrush line. East wind pushes bait directly into mats." }
-      ],
-      grass: [[27.160, -80.860], [27.150, -80.830], [27.140, -80.850]],
-      depths: [
-        { coords: [[27.162,-80.863],[27.148,-80.848]], depth: "2-4 ft flat", color: "#7dd3fc" },
-        { coords: [[27.165, -80.850], [27.135, -80.835]], depth: "5-7 ft", color: "#0ea5e9" }
-      ],
-      bigBassZones: [
-        { coords: [[27.158,-80.863],[27.163,-80.850],[27.153,-80.842],[27.146,-80.852]], label: "Observation Shoal Big Bass Zone", reason: "Classic Okeechobee eelgrass-to-bulrush transition &mdash; wind-loaded bait draws quality fish shallow." }
-      ],
-      heatmap: [[27.155, -80.840, 1.0]]
-    },
-    "istokpoga": {
-      name: "Lake Istokpoga (Sebring)",
-      center: [27.370, -81.300], zoom: 12,
-      spots: [
-        { lat: 27.375, lng: -81.320, title: "Big Island Spawning Flats", rating: "9.3", lure: "Weightless Watermelon Texas Rig", desc: "Submerged hydrilla fields with sandy pockets." }
-      ],
-      grass: [[27.380, -81.330], [27.370, -81.310], [27.360, -81.325]],
-      depths: [
-        { coords: [[27.382,-81.333],[27.368,-81.318]], depth: "1-3 ft flat", color: "#7dd3fc" },
-        { coords: [[27.385, -81.310], [27.355, -81.290]], depth: "4-6 ft", color: "#0ea5e9" }
-      ],
-      bigBassZones: [
-        { coords: [[27.378,-81.333],[27.383,-81.322],[27.373,-81.313],[27.365,-81.322]], label: "Big Island Spawning Zone", reason: "Sandy pockets within hydrilla fields are prime spring bedding sites for trophy females." }
-      ],
-      heatmap: [[27.375, -81.320, 0.95]]
-    },
-    "seminole": {
-      name: "Lake Seminole (FL/GA Border)",
-      center: [30.750, -84.870], zoom: 12,
-      spots: [
-        { lat: 30.760, lng: -84.885, title: "Flint & Chattahoochee Junction", rating: "9.6", lure: "Heavy Swimbait / Deep Crank", desc: "Major river channel intersection over standing timber humps." }
-      ],
-      grass: [[30.765, -84.890], [30.755, -84.875]],
-      depths: [
-        { coords: [[30.767,-84.893],[30.757,-84.878]], depth: "3-5 ft", color: "#7dd3fc" },
-        { coords: [[30.770, -84.895], [30.745, -84.860]], depth: "16-22 ft channel", color: "#075985" }
-      ],
-      bigBassZones: [
-        { coords: [[30.763,-84.892],[30.768,-84.882],[30.758,-84.876],[30.753,-84.884]], label: "River Junction Timber Zone", reason: "Two-river confluence over submerged timber humps &mdash; a proven big-bass staging area." }
-      ],
-      heatmap: [[30.760, -84.885, 0.96]]
-    },
-    "lake_washington": {
-      name: "Lake Washington (Melbourne, Brevard County)",
-      center: [28.1528, -80.7428], zoom: 13,
-      spots: [
-        { lat: 28.190, lng: -80.745, title: "North End Vegetation Flats & Fish Attractors", rating: "9.5", lure: "Texas-Rigged Creature Bait / Buzzbait", desc: "Abundant emergent vegetation on the lake's north end, with several FWC fish attractors marked by buoys." },
-        { lat: 28.140, lng: -80.733, title: "Southeast Shoreline Woody Debris", rating: "9.2", lure: "ChatterBait / Beaver-Style Flip Bait", desc: "Woody debris and emergent vegetation along the east and southeast shoreline &mdash; a documented TrophyCatch producer." },
-        { lat: 28.150, lng: -80.731, title: "Lake Washington Park Pier Flats", rating: "8.6", lure: "Live Shiner / Weightless Worm", desc: "Pads and bulrush near the public fishing pier and boat ramp on the east shore &mdash; good shore-access bass and bream water." }
-      ],
-      grass: [[28.195, -80.750], [28.183, -80.736], [28.172, -80.746], [28.180, -80.756]],
-      depths: [
-        { coords: [[28.192,-80.752],[28.170,-80.744],[28.150,-80.734]], depth: "2-4 ft flat", color: "#7dd3fc" },
-        { coords: [[28.185, -80.745], [28.155, -80.740], [28.120, -80.740]], depth: "St. Johns River channel, 10-15 ft", color: "#075985" }
-      ],
-      bigBassZones: [
-        { coords: [[28.193,-80.752],[28.198,-80.740],[28.186,-80.732],[28.178,-80.744]], label: "North End TrophyCatch Zone", reason: "Largest vegetation mass on the lake plus marked fish attractors &mdash; the zone most associated with FWC TrophyCatch-documented 8lb+ bass." },
-        { coords: [[28.144,-80.738],[28.148,-80.729],[28.136,-80.724],[28.132,-80.732]], label: "Southeast Woody Debris Zone", reason: "Woody debris and shoreline vegetation the FWC specifically flags as productive for bass along the east/southeast shore." }
-      ],
-      heatmap: [[28.190, -80.745, 1.0], [28.140, -80.733, 0.9], [28.150, -80.731, 0.7]]
-    }
+  // Lake Data Dictionary (All individual lakes explicitly mapped out)
+  const lakeData = {
+    washington: { name: "Lake Washington", lat: 28.1439, lng: -80.7425, zoom: 14, depth: "3 - 12 ft", notes: "St. Johns River headwaters lake. Known for thick hydrilla lines and river channel drop-offs." },
+    poinsett: { name: "Lake Poinsett", lat: 28.3492, lng: -80.8328, zoom: 13, depth: "4 - 10 ft", notes: "Heavy lily pad cover and shell beds near the main channel entrance." },
+    winder: { name: "Lake Winder", lat: 28.2292, lng: -80.7853, zoom: 14, depth: "3 - 8 ft", notes: "Shallow river expansion lake. Target outer bulrush edges and pad fields." },
+    monroe: { name: "Lake Monroe", lat: 28.8411, lng: -81.2583, zoom: 13, depth: "6 - 18 ft", notes: "Deeper St. Johns system lake with distinct drop-offs and bridge pilings." },
+    george: { name: "Lake George", lat: 29.2889, lng: -81.5972, zoom: 11, depth: "8 - 12 ft", notes: "Massive natural lake. Famous for eelgrass beds and salt-spring influences." },
+    tohopekaliga: { name: "Lake Tohopekaliga (Toho)", lat: 28.2250, lng: -81.3850, zoom: 13, depth: "4 - 13 ft", notes: "Premier trophy bass water. Focus on shiners, hydrilla humps, and artificial pepper grass." },
+    eastoho: { name: "East Lake Tohopekaliga", lat: 28.3000, lng: -81.2500, zoom: 13, depth: "6 - 15 ft", notes: "Clearer water than West Toho. High concentration of maidencane and Kissimmee grass." },
+    cypress: { name: "Lake Cypress", lat: 28.1303, lng: -81.3325, zoom: 14, depth: "4 - 10 ft", notes: "Connecting lake on Kissimmee Chain. Excellent flipping bite in flooded timber/cypress." },
+    hatchineha: { name: "Lake Hatchineha", lat: 28.0011, lng: -81.3889, zoom: 13, depth: "5 - 12 ft", notes: "Expansive shell bars and outer reed lines. High water flow channels." },
+    kissimmee: { name: "Lake Kissimmee", lat: 27.9150, lng: -81.2850, zoom: 12, depth: "5 - 14 ft", notes: "Famous Brahma Island, North Cove, and Lemon Point shell beds." },
+    harris: { name: "Lake Harris", lat: 28.7750, lng: -81.8250, zoom: 13, depth: "6 - 18 ft", notes: "Deep spring-fed humps and deep hydrilla edges." },
+    eustis: { name: "Lake Eustis", lat: 28.8500, lng: -81.6833, zoom: 13, depth: "8 - 20 ft", notes: "Dead River mouth and trench structure yield large winter bass." },
+    griffin: { name: "Lake Griffin", lat: 28.8833, lng: -81.8833, zoom: 13, depth: "5 - 15 ft", notes: "Target dredge holes, canals, and submerged offshore vegetation." },
+    dora: { name: "Lake Dora", lat: 28.8000, lng: -81.6500, zoom: 13, depth: "6 - 10 ft", notes: "Dora Canal mouth and boat docks provide key structure." },
+    okeechobee: { name: "Lake Okeechobee", lat: 26.9500, lng: -80.8333, zoom: 11, depth: "6 - 14 ft", notes: "The Big O. Target Monkey Box, Moonshine Bay, and Harney Pond cuts." },
+    istokpoga: { name: "Lake Istokpoga", lat: 27.3833, lng: -81.3000, zoom: 12, depth: "4 - 10 ft", notes: "Known for giant bass in spatterdock, cattails, and offshore spottings." },
+    arbuckle: { name: "Lake Arbuckle", lat: 27.6833, lng: -81.4167, zoom: 14, depth: "5 - 12 ft", notes: "Tannic water with cypress tree knees and deep channel bends." },
+    tarpon: { name: "Lake Tarpon", lat: 28.1000, lng: -82.7167, zoom: 13, depth: "8 - 14 ft", notes: "Pinellas County gem with deep weed lines and sinkhole formations." }
   };
 
-  let map, heatLayer, grassGroup, depthGroup, spotGroup, bigBassGroup;
-  let currentKey = 'harris_chain';
+  // Initialize Map Variables
+  let map;
+  let satLayer, osmLayer, contourLayer, hotspotGroup;
 
-  map = L.map('map', { zoomControl: false }).setView(floridaWaterbodies.harris_chain.center, floridaWaterbodies.harris_chain.zoom);
+  function initMap() {
+    // Center initially near Lake Washington
+    map = L.map('map', { zoomControl: false }).setView([28.1439, -80.7425], 13);
+    L.control.zoom({ position: 'topright' }).addTo(map);
 
-  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-    maxZoom: 18,
-    attribution: 'Esri World Imagery'
-  }).addTo(map);
+    // Base Imagery Layers
+    satLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+      attribution: 'Esri Satellite'
+    }).addTo(map);
 
-  grassGroup = L.layerGroup().addTo(map);
-  depthGroup = L.layerGroup().addTo(map);
-  spotGroup = L.layerGroup().addTo(map);
-  bigBassGroup = L.layerGroup().addTo(map);
+    osmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: 'OpenStreetMap'
+    });
 
-  function initDropdown() {
-    const dropdown = document.getElementById('lake-dropdown');
-    dropdown.innerHTML = '';
-    for (let key in floridaWaterbodies) {
-      let opt = document.createElement('option');
-      opt.value = key;
-      opt.innerText = floridaWaterbodies[key].name;
-      dropdown.appendChild(opt);
-    }
-    dropdown.value = currentKey;
+    // Bathymetry / Depth Contours Tile Overlay (OpenSeaMap depth contour layer)
+    contourLayer = L.tileLayer('https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png', {
+      attribution: 'OpenSeaMap Bathymetry Data'
+    }).addTo(map);
+
+    hotspotGroup = L.layerGroup().addTo(map);
+
+    // Populate Initial Markers for Lake Washington & major points
+    plotLakeMarkers();
+    updateRecommendations();
   }
 
-  function renderWaterbody(key) {
-    const data = floridaWaterbodies[key];
-    if (!data) return;
+  // Plot interactive hotspot markers across Florida lakes
+  function plotLakeMarkers() {
+    hotspotGroup.clearLayers();
 
-    grassGroup.clearLayers();
-    depthGroup.clearLayers();
-    spotGroup.clearLayers();
-    bigBassGroup.clearLayers();
-    if (heatLayer) map.removeLayer(heatLayer);
-
-    heatLayer = L.heatLayer(data.heatmap, { radius: 40, blur: 25, maxZoom: 15 });
-    if (document.getElementById('btn-heat').classList.contains('active')) {
-      heatLayer.addTo(map);
-    }
-
-    if (data.grass && data.grass.length) {
-      L.polygon(data.grass, { color: '#22c55e', fillColor: '#22c55e', fillOpacity: 0.35, weight: 2 }).addTo(grassGroup);
-    }
-
-    (data.depths || []).forEach(band => {
-      L.polyline(band.coords, { color: band.color, weight: 4, opacity: 0.85 })
-        .bindPopup(`<div class="popup-title">Bottom Map</div><div class="popup-detail">Approx. depth: <strong>${band.depth}</strong></div>`)
-        .addTo(depthGroup);
-    });
-
-    (data.bigBassZones || []).forEach(zone => {
-      L.polygon(zone.coords, { color: '#eab308', fillColor: '#eab308', fillOpacity: 0.22, weight: 2, dashArray: '6, 4' })
-        .bindPopup(`<div class="popup-title">${zone.label}</div><span class="popup-badge gold">BIG BASS ZONE</span><div class="popup-detail">${zone.reason}</div>`)
-        .addTo(bigBassGroup);
-    });
-
-    (data.spots || []).forEach(spot => {
-      const pinIcon = L.divIcon({
-        className: 'custom-pin',
-        html: `<div style="background:#ef4444; width:26px; height:26px; border-radius:50%; border:2px solid #fff; box-shadow:0 0 12px rgba(239,68,68,0.9); display:flex; align-items:center; justify-content:center; font-weight:900; font-size:11px; color:#fff;">${spot.rating}</div>`,
-        iconSize: [26, 26]
+    Object.keys(lakeData).forEach(key => {
+      const lake = lakeData[key];
+      
+      // Lake Center Marker
+      const marker = L.circleMarker([lake.lat, lake.lng], {
+        radius: 8,
+        color: '#38bdf8',
+        fillColor: '#0284c7',
+        fillOpacity: 0.8
       });
 
-      const popupHtml = `
-        <div class="popup-title">${spot.title}</div>
-        <span class="popup-badge">BITE SCORE: ${spot.rating}/10</span>
-        <div class="popup-detail">${spot.desc}</div>
-        <div class="popup-lure">RECOMMENDED LURE: ${spot.lure}</div>
-      `;
+      marker.bindPopup(`
+        <div class="popup-title">${lake.name}</div>
+        <p><strong>Avg Depth:</strong> ${lake.depth}</p>
+        <p><strong>Structure:</strong> ${lake.notes}</p>
+        <button style="margin-top:8px; padding:4px 8px; background:#0284c7; color:#fff; border:none; border-radius:4px; cursor:pointer;" onclick="focusLake('${key}')">Focus Lake</button>
+      `);
 
-      L.marker([spot.lat, spot.lng], { icon: pinIcon })
-        .bindPopup(popupHtml)
-        .addTo(spotGroup);
+      hotspotGroup.addLayer(marker);
+
+      // Add simulated depth contour rings for visual bottom structure
+      L.circle([lake.lat, lake.lng], {
+        radius: 1200,
+        color: '#0284c7',
+        weight: 1,
+        dashArray: '4, 4',
+        fill: false
+      }).addTo(hotspotGroup);
+
+      L.circle([lake.lat, lake.lng], {
+        radius: 600,
+        color: '#38bdf8',
+        weight: 1.5,
+        dashArray: '2, 2',
+        fill: false
+      }).addTo(hotspotGroup);
     });
   }
 
-  function selectLake(key) {
-    if (!floridaWaterbodies[key]) return;
-    currentKey = key;
-    const target = floridaWaterbodies[key];
-    map.flyTo(target.center, target.zoom, { duration: 1.5 });
-    renderWaterbody(key);
+  // Focus Map on Selected Lake
+  function focusLake(key) {
+    if (!key || !lakeData[key]) return;
+    const lake = lakeData[key];
+    map.flyTo([lake.lat, lake.lng], lake.zoom, { duration: 1.5 });
+
+    // Synchronize select dropdown if tapped from map marker
+    document.getElementById('lakeSelect').value = key;
   }
 
-  function filterLakes() {
-    const query = document.getElementById('search-input').value.toLowerCase();
-    const dropdown = document.getElementById('lake-dropdown');
+  // Layer Visibility Toggle
+  function toggleLayers() {
+    const sat = document.getElementById('layerSatellite').checked;
+    const contours = document.getElementById('layerContours').checked;
+    const hotspots = document.getElementById('layerHotspots').checked;
 
-    let firstVisibleValue = null;
-    for (let i = 0; i < dropdown.options.length; i++) {
-      const opt = dropdown.options[i];
-      const text = opt.text.toLowerCase();
-      const matches = text.includes(query);
-      opt.style.display = matches ? "" : "none";
-      if (matches && firstVisibleValue === null) firstVisibleValue = opt.value;
+    if (sat) {
+      if (!map.hasLayer(satLayer)) map.addLayer(satLayer);
+    } else {
+      if (map.hasLayer(satLayer)) map.removeLayer(satLayer);
     }
 
-    const selectedOpt = dropdown.options[dropdown.selectedIndex];
-    if (selectedOpt && selectedOpt.style.display === "none" && firstVisibleValue) {
-      dropdown.value = firstVisibleValue;
-      selectLake(firstVisibleValue);
+    if (contours) {
+      if (!map.hasLayer(contourLayer)) map.addLayer(contourLayer);
+    } else {
+      if (map.hasLayer(contourLayer)) map.removeLayer(contourLayer);
     }
-  }
 
-  function toggleLayer(type) {
-    const btn = document.getElementById(`btn-${type}`);
-    btn.classList.toggle('active');
-
-    if (type === 'heat') {
-      if (map.hasLayer(heatLayer)) map.removeLayer(heatLayer); else map.addLayer(heatLayer);
-    } else if (type === 'grass') {
-      if (map.hasLayer(grassGroup)) map.removeLayer(grassGroup); else map.addLayer(grassGroup);
-    } else if (type === 'depth') {
-      if (map.hasLayer(depthGroup)) map.removeLayer(depthGroup); else map.addLayer(depthGroup);
-    } else if (type === 'spots') {
-      if (map.hasLayer(spotGroup)) map.removeLayer(spotGroup); else map.addLayer(spotGroup);
-    } else if (type === 'bigbass') {
-      if (map.hasLayer(bigBassGroup)) map.removeLayer(bigBassGroup); else map.addLayer(bigBassGroup);
+    if (hotspots) {
+      if (!map.hasLayer(hotspotGroup)) map.addLayer(hotspotGroup);
+    } else {
+      if (map.hasLayer(hotspotGroup)) map.removeLayer(hotspotGroup);
     }
   }
 
-  function onTimeChange(val) {
-    val = Number(val);
-    const formatted = val < 12 ? `${val}:00 AM` : val === 12 ? `12:00 PM` : `${val - 12}:00 PM`;
-    document.getElementById('time-readout').innerText = formatted;
+  // FWC & Pro Bassmaster Lure Engine
+  function updateRecommendations() {
+    const temp = parseInt(document.getElementById('tempInput').value) || 72;
+    const season = document.getElementById('seasonSelect').value;
+    const recomBox = document.getElementById('recomBox');
 
-    let score = (7.5 + Math.sin(val * 0.8) * 2.1).toFixed(1);
-    score = Math.min(9.8, Math.max(5.4, score));
+    let title = "";
+    let baits = [];
+    let colors = [];
+    let tactics = "";
 
-    document.getElementById('score-num').innerText = score;
-    document.getElementById('solunar-val').innerText = `${Math.round(score * 10)}% (${score > 8.5 ? 'PEAK' : 'MODERATE'})`;
+    if (temp >= 80 || season === "summer") {
+      title = "Summer / Late Post-Spawn Pattern";
+      baits = ["10\" Soft Plastic Worms", "Hollow Body Frogs", "Lipless Crankbaits", "Punching Rigs (1.5oz)"];
+      colors = ["Junebug", "Red Shad", "Black/Blue", "Green Pumpkin"];
+      tactics = "FWC recommends early morning topwater along outer grass edges. During heat peaks, target deep river channels or punch dense hydrilla mats.";
+    } else if (temp >= 68 && temp < 80) {
+      if (season === "spring") {
+        title = "Spring Spawn / Sight Fishing Pattern";
+        baits = ["Soft Stickbaits (Senko)", "White Spinnerbaits", "Chatterbaits", "Flukes"];
+        colors = ["Watermelon Red", "White/Chartreuse", "Golden Shiner", "Natural Green"];
+        tactics = "Fish shallow bed areas in Kissimmee grass, bulrush, and lily pads. Slow rolling spinnerbaits over vegetation produces aggressive strikes.";
+      } else {
+        title = "Fall Feeding Frenzy Pattern";
+        baits = ["Squarebill Crankbaits", "Topwater Buzzbaits", "Swimbaits", "Jigs"];
+        colors = ["Sexy Shad", "Chrome/Blue", "Green Pumpkin", "Black/Yellow"];
+        tactics = "Bass chase shad schools into creek mouths and shallow flats. Fast moving search baits cover water efficiently.";
+      }
+    } else {
+      title = "Winter / Cold Front Pattern";
+      baits = ["Live Florida Golden Shiners", "Suspending Jerkbaits", "Finesse Jigs", "Slow-Rolled Spinnerbaits"];
+      colors = ["Black/Blue", "Gold/Black", "Junebug", "Dark Craw"];
+      tactics = "Post-cold front bass back off into deeper holes (8-15ft). Slow down drastically; pitch jigs or wild shiners into deep cover pockets.";
+    }
+
+    let tagsHtml = colors.map(c => `<span class="tag">${c}</span>`).join(' ');
+    let baitsList = baits.map(b => `<li>${b}</li>`).join('');
+
+    recomBox.innerHTML = `
+      <h4>${title} (${temp}°F)</h4>
+      <p style="margin: 6px 0;"><strong>Recommended Lure Colors:</strong></p>
+      <div>${tagsHtml}</div>
+      <p style="margin: 8px 0 4px 0;"><strong>Top Bait Options:</strong></p>
+      <ul style="padding-left: 18px; margin-bottom: 8px;">${baitsList}</ul>
+      <p style="color: #94a3b8; font-size:0.8rem;"><em>Pro Tip: ${tactics}</em></p>
+    `;
   }
 
-  window.selectLake = selectLake;
-  window.filterLakes = filterLakes;
-  window.toggleLayer = toggleLayer;
-  window.onTimeChange = onTimeChange;
-
-  initDropdown();
-  renderWaterbody('harris_chain');
-})();
+  // Initialize on page load
+  window.onload = initMap;
 </script>
+
 </body>
 </html>
